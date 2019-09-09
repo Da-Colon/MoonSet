@@ -22,7 +22,14 @@ pygame.mixer.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("MoonSet")
 clock = pygame.time.Clock()
+font_name = pygame.font.match_font('arial')
 
+def draw_text(surf, text, size, x, y):
+    font = pygame.font.Font(font_name, size)
+    text_surface = font.render(text, True, WHITE)
+    text_rect = text_surface.get_rect()
+    text_rect.midtop = (x, y)
+    surf.blit(text_surface, text_rect)
 
 class PlayerShip(pygame.sprite.Sprite):
     def __init__(self):
@@ -129,10 +136,9 @@ for img in meteor_list:
 all_sprites = pygame.sprite.Group()
 mob = pygame.sprite.Group() 
 bullets = pygame.sprite.Group()
-
 player = PlayerShip()
 all_sprites.add(player)
-
+score = 0
 
 # Spawns up to 8 Enemy Ships by added them to the all_sprites group allow them to be drawn
 for i in range(8):
@@ -165,6 +171,7 @@ while running:
     #check to see if a bullet hit a mob
     hits = pygame.sprite.groupcollide(mob, bullets, True, True,)
     for hit in hits:
+        score += 50 - hit.radius
         a = Mob()
         all_sprites.add(a)
         mob.add(a)
@@ -177,6 +184,7 @@ while running:
     screen.fill(BLACK)
     screen.blit(background, background_rect)
     all_sprites.draw(screen)
+    draw_text(screen, str(score), 18, WIDTH / 2, 10)
     # *after* drawing everything, flip the display
     pygame.display.flip()
 
