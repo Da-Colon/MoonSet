@@ -3,6 +3,7 @@ import random
 from os import path
 
 img_dir = path.join(path.dirname(__file__), 'img')
+snd_dir = path.join(path.dirname(__file__), 'snd')
 
 WIDTH = 480
 HEIGHT = 600
@@ -22,14 +23,31 @@ pygame.mixer.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("MoonSet")
 clock = pygame.time.Clock()
-font_name = pygame.font.match_font('arial')
 
+font_name = pygame.font.match_font('arial')
 def draw_text(surf, text, size, x, y):
     font = pygame.font.Font(font_name, size)
     text_surface = font.render(text, True, WHITE)
     text_rect = text_surface.get_rect()
     text_rect.midtop = (x, y)
     surf.blit(text_surface, text_rect)
+def newmob():
+    a = Mob()
+    all_sprites.add(a)
+    mob.add(a)
+
+def draw_shield_bar(surf, x, y, pct):
+    if pct < 0:
+        pct = 0
+    BAR_LENGTH = 100
+    BAR_HEIGHT = 10
+    fill = (pct / 100) * BAR_LENGTH 
+    outline_rect = pygame.Rect(x, y, BAR_LENGTH, BAR_HEIGHT)
+    fill_rect = pygame.Rect(x, y, fill, BAR_HEIGHT)
+    pygame.draw.rect(surf, GREEN, fill_rect)
+    pygame.draw.rect(surf, WHITE, outline_rect, 2)
+
+
 
 class PlayerShip(pygame.sprite.Sprite):
     def __init__(self):
@@ -44,6 +62,7 @@ class PlayerShip(pygame.sprite.Sprite):
         self.rect.centerx = WIDTH / 2
         self.rect.bottom = HEIGHT - 10
         self.speedx = 0
+        self.shield = 100
 
     def update(self):
         self.speedx = 0
@@ -62,6 +81,7 @@ class PlayerShip(pygame.sprite.Sprite):
         bullet = Bullet(self.rect.centerx, self.rect.top)
         all_sprites.add(bullet)
         bullets.add(bullet)
+        shoot_sound.play()
 
 class Mob(pygame.sprite.Sprite):
     def __init__(self):
@@ -132,19 +152,24 @@ meteor_list = ['meteor1.png', 'meteor2.png', 'meteor3.png',
                 'meteor7.png' , 'meteor8.png', 'meteor9.png']
 for img in meteor_list:
     meteor_images.append(pygame.image.load(path.join(img_dir, img)).convert())
+# Load all game sounds
+shoot_sound = pygame.mixer.Sound(path.join(snd_dir,'Laser_Shoot.wav'))
+expl_sound = []
+for snd in ['expl1.wav', 'expl2.wav']:
+    expl_sound.append(pygame.mixer.Sound(path.join(snd_dir, snd)))
+pygame.mixer.music.load(path.join(snd_dir, 'Lunar Harvest v1_0.mp3'))
+pygame.mixer.music.set_volume(0.4)
 
 all_sprites = pygame.sprite.Group()
 mob = pygame.sprite.Group() 
 bullets = pygame.sprite.Group()
 player = PlayerShip()
 all_sprites.add(player)
-score = 0
-
-# Spawns up to 8 Enemy Ships by added them to the all_sprites group allow them to be drawn
 for i in range(8):
-    a = Mob()
-    all_sprites.add(a)
-    mob.add(a)
+    newmob()
+score = 0
+pygame.mixer.music.play(loops=-1)
+# Spawns up to 8 Enemy Ships by added them to the all_sprites group allow them to be drawn
 
 # Game loop
 running = True
@@ -172,19 +197,24 @@ while running:
     hits = pygame.sprite.groupcollide(mob, bullets, True, True,)
     for hit in hits:
         score += 50 - hit.radius
-        a = Mob()
-        all_sprites.add(a)
-        mob.add(a)
+        random.choice(expl_sound).play()
+        newmob()
+
     #check to see if a mob hit the player
-    hits = pygame.sprite.spritecollide(player, mob, False, pygame.sprite.collide_circle)
-    if hits: 
-        running = False
+    hits = pygame.sprite.spritecollide(player, mob, True, pygame.sprite.collide_circle)
+    for hit in hits: 
+        player.shield -= hit.radius * 2
+        newmob()
+        if player.shield <= 0:
+            running = False
+
 
     # Draw / render
     screen.fill(BLACK)
     screen.blit(background, background_rect)
     all_sprites.draw(screen)
     draw_text(screen, str(score), 18, WIDTH / 2, 10)
+    draw_shield_bar(screen, 5, 5, player.shield)
     # *after* drawing everything, flip the display
     pygame.display.flip()
 
