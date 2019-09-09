@@ -25,7 +25,6 @@ pygame.display.set_caption("MoonSet")
 clock = pygame.time.Clock()
 
 font_name = pygame.font.match_font('arial')
-
 def draw_text(surf, text, size, x, y):
     font = pygame.font.Font(font_name, size)
     text_surface = font.render(text, True, WHITE)
@@ -179,7 +178,7 @@ expl_sound = []
 for snd in ['expl1.wav', 'expl2.wav']:
     expl_sound.append(pygame.mixer.Sound(path.join(snd_dir, snd)))
 pygame.mixer.music.load(path.join(snd_dir, 'Lunar Harvest v1_0.mp3'))
-pygame.mixer.music.set_volume(0.4)
+pygame.mixer.music.set_volume(0.6)
 
 all_sprites = pygame.sprite.Group()
 mob = pygame.sprite.Group()
@@ -199,6 +198,10 @@ running = True
 
 # * Game loop
 while running:
+
+    # keep loop running at the right speed
+    clock.tick(FPS)
+    # * Process input (events)
     if game_over:
         show_gameover_screen()
         game_over = False
@@ -208,11 +211,8 @@ while running:
         bullets = pygame.sprite.Group()
         player = PlayerShip()
         all_sprites.add(player)
-        newmob()
-
-    # keep loop running at the right speed
-    clock.tick(FPS)
-    # * Process input (events)
+        for i in range(8):
+            newmob()
     for event in pygame.event.get():
         # check for closing window
         if event.type == pygame.QUIT:
@@ -231,9 +231,9 @@ while running:
     # check to see if a bullet hit a mob
     hits = pygame.sprite.groupcollide(mob, bullets, True, True,)
     for hit in hits:
+        newmob()
         score += 50 - hit.radius
         random.choice(expl_sound).play()
-        newmob()
 
     #check to see if a mob hit the player
     hits = pygame.sprite.spritecollide(player, mob, True, pygame.sprite.collide_circle)
@@ -241,9 +241,7 @@ while running:
         player.shield -= hit.radius * 2
         newmob()
         if player.shield <= 0:
-            running = False
-        if hits:
-        game_over = True
+            game_over = True
 
 
     # * Draw / render
