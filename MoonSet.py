@@ -3,10 +3,11 @@ import random
 from os import path
 
 img_dir = path.join(path.dirname(__file__), 'img')
+snd_dir = path.join(path.dirname(__file__), 'snd')
 
 WIDTH = 480
 HEIGHT = 600
-FPS = 60 
+FPS = 60
 
 # define colors
 WHITE = (255, 255, 255)
@@ -14,7 +15,7 @@ BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
-YELLOW = (255,255, 0)
+YELLOW = (255, 255, 0)
 
 # initialize pygame and create window
 pygame.init()
@@ -23,6 +24,30 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("MoonSet")
 clock = pygame.time.Clock()
 
+font_name = pygame.font.match_font('arial')
+
+def draw_text(surf, text, size, x, y):
+    font = pygame.font.Font(font_name, size)
+    text_surface = font.render(text, True, WHITE)
+    text_rect = text_surface.get_rect()
+    text_rect.midtop = (x, y)
+    surf.blit(text_surface, text_rect)
+
+def newmob():
+    a = Mob()
+    all_sprites.add(a)
+    mob.add(a)
+
+def draw_shield_bar(surf, x, y, pct):
+    if pct < 0:
+        pct = 0
+    BAR_LENGTH = 100
+    BAR_HEIGHT = 10
+    fill = (pct / 100) * BAR_LENGTH 
+    outline_rect = pygame.Rect(x, y, BAR_LENGTH, BAR_HEIGHT)
+    fill_rect = pygame.Rect(x, y, fill, BAR_HEIGHT)
+    pygame.draw.rect(surf, GREEN, fill_rect)
+    pygame.draw.rect(surf, WHITE, outline_rect, 2)
 
 class PlayerShip(pygame.sprite.Sprite):
     def __init__(self):
@@ -38,6 +63,8 @@ class PlayerShip(pygame.sprite.Sprite):
         self.rect.bottom = HEIGHT - 10
         self.speedx = 0
         self.speedy = 0
+        self.shield = 100
+
 
     def update(self):
         self.speedx = 0
@@ -66,6 +93,8 @@ class PlayerShip(pygame.sprite.Sprite):
         bullet = Bullet(self.rect.centerx, self.rect.top)
         all_sprites.add(bullet)
         bullets.add(bullet)
+        shoot_sound.play()
+
 
 class Mob(pygame.sprite.Sprite):
     def __init__(self):
@@ -100,7 +129,7 @@ class Mob(pygame.sprite.Sprite):
         self.rect.x += self.speedx
         self.rect.y += self.speedy
         if self.rect.top > HEIGHT + 10 or self.rect.left < -25 or self.rect.right > WIDTH + 20:
-            self.rect.x = random.randrange(WIDTH - self.rect.width) 
+            self.rect.x = random.randrange(WIDTH - self.rect.width)
             self.rect.y = random.randrange(-100, -40)
             self.speedy = random.randrange(1, 8)
 
@@ -123,6 +152,26 @@ class Bullet(pygame.sprite.Sprite):
         if self.rect.bottom < 0:
             self.kill()
 
+# The Menu and the Game Over Screen are the same. For now.
+
+
+def show_gameover_screen():
+    screen.blit(background, background_rect)
+    draw_text(screen, "MoonSet!", 64, WIDTH / 2, HEIGHT / 4)
+    draw_text(screen, "Arrow Keys move, Space to fire",
+              22, WIDTH / 2, HEIGHT / 2)
+    draw_text(screen, "Press C to Continue", 18, WIDTH / 2, HEIGHT * 3 / 4)
+    pygame.display.flip()
+    waiting = True
+    while waiting:
+        clock.tick(FPS)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_c:
+                    waiting = False
+
 
 # Load all game graphics
 background = pygame.image.load(path.join(img_dir, "6776.jpg")).convert()
@@ -132,31 +181,50 @@ bullet_img = pygame.image.load(path.join(img_dir, "laserRed01.png")).convert()
 # meteor_img = pygame.image.load(path.join(img_dir, "meteorBrown_med1.png")).convert()
 meteor_images = []
 meteor_list = ['meteor1.png', 'meteor2.png', 'meteor3.png',
-                'meteor4.png', 'meteor5.png', 'meteor6.png',
-                'meteor7.png' , 'meteor8.png', 'meteor9.png']
+               'meteor4.png', 'meteor5.png', 'meteor6.png',
+               'meteor7.png', 'meteor8.png', 'meteor9.png']
 for img in meteor_list:
     meteor_images.append(pygame.image.load(path.join(img_dir, img)).convert())
+# Load all game sounds
+shoot_sound = pygame.mixer.Sound(path.join(snd_dir,'Laser_Shoot.wav'))
+expl_sound = []
+for snd in ['expl1.wav', 'expl2.wav']:
+    expl_sound.append(pygame.mixer.Sound(path.join(snd_dir, snd)))
+pygame.mixer.music.load(path.join(snd_dir, 'Lunar Harvest v1_0.mp3'))
+pygame.mixer.music.set_volume(0.4)
 
 all_sprites = pygame.sprite.Group()
-mob = pygame.sprite.Group() 
+mob = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
-
 player = PlayerShip()
 all_sprites.add(player)
 
+for i in range(8):
+    newmob()
+score = 0
+pygame.mixer.music.play(loops=-1)
 
 # Spawns up to 8 Enemy Ships by added them to the all_sprites group allow them to be drawn
-for i in range(8):
-    a = Mob()
-    all_sprites.add(a)
-    mob.add(a)
 
-# Game loop
+game_over = True
 running = True
+
+# * Game loop
 while running:
+    if game_over:
+        show_gameover_screen()
+        game_over = False
+        # when we come back from game over screen, we need to reload all the game objects
+        all_sprites = pygame.sprite.Group()
+        mob = pygame.sprite.Group()
+        bullets = pygame.sprite.Group()
+        player = PlayerShip()
+        all_sprites.add(player)
+        newmob()
+
     # keep loop running at the right speed
     clock.tick(FPS)
-    # Process input (events)
+    # * Process input (events)
     for event in pygame.event.get():
         # check for closing window
         if event.type == pygame.QUIT:
@@ -168,26 +236,34 @@ while running:
             if event.key == pygame.K_q:
                 running = False
 
-
-    # Update
+    # * Update
     all_sprites.update()
-    
+
     #!Collisions
-    #check to see if a bullet hit a mob
+    # check to see if a bullet hit a mob
     hits = pygame.sprite.groupcollide(mob, bullets, True, True,)
     for hit in hits:
-        a = Mob()
-        all_sprites.add(a)
-        mob.add(a)
-    #check to see if a mob hit the player
-    hits = pygame.sprite.spritecollide(player, mob, False, pygame.sprite.collide_circle)
-    if hits: 
-        running = False
+        score += 50 - hit.radius
+        random.choice(expl_sound).play()
+        newmob()
 
-    # Draw / render
+    #check to see if a mob hit the player
+    hits = pygame.sprite.spritecollide(player, mob, True, pygame.sprite.collide_circle)
+    for hit in hits: 
+        player.shield -= hit.radius * 2
+        newmob()
+        if player.shield <= 0:
+            running = False
+        if hits:
+        game_over = True
+
+
+    # * Draw / render
     screen.fill(BLACK)
     screen.blit(background, background_rect)
     all_sprites.draw(screen)
+    draw_text(screen, str(score), 18, WIDTH / 2, 10)
+    draw_shield_bar(screen, 5, 5, player.shield)
     # *after* drawing everything, flip the display
     pygame.display.flip()
 
