@@ -258,7 +258,8 @@ class Enemy_Bullet(pygame.sprite.Sprite):
         self.image = enemy_bullet_img
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
-        self.rect.bottom = y
+        # moves the bullets to the front of the enemy ship
+        self.rect.bottom = y + 100
         self.rect.centerx = x
         self.speedy = 10
 
