@@ -50,18 +50,19 @@ def draw_shield_bar(surf, x, y, pct):
         pct = 0
     BAR_LENGTH = 100
     BAR_HEIGHT = 10
-    fill = (pct / 100) * BAR_LENGTH 
+    fill = (pct / 100) * BAR_LENGTH
     outline_rect = pygame.Rect(x, y, BAR_LENGTH, BAR_HEIGHT)
     fill_rect = pygame.Rect(x, y, fill, BAR_HEIGHT)
     pygame.draw.rect(surf, GREEN, fill_rect)
     pygame.draw.rect(surf, WHITE, outline_rect, 2)
+
 
 def progress_bar(surf, x, y, pct):
     if pct < 0:
         pct = 0
     BAR_LENGTH = 150
     BAR_HEIGHT = 20
-    fill = (pct / 100) * BAR_LENGTH 
+    fill = (pct / 100) * BAR_LENGTH
     outline_rect = pygame.Rect(x, y, BAR_LENGTH, BAR_HEIGHT)
     fill_rect = pygame.Rect(x, y, fill, BAR_HEIGHT)
     pygame.draw.rect(surf, BLUE, fill_rect)
@@ -134,6 +135,7 @@ class PlayerShip(pygame.sprite.Sprite):
         bullets.add(bullet)
         shoot_sound.play()
 
+
 class Player2Ship(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
@@ -183,7 +185,9 @@ class Player2Ship(pygame.sprite.Sprite):
 class Mob(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image_orig = random.choice(enemy_images)
+        # enemy ships are slightly larger
+        self.image_orig = pygame.transform.scale(
+            random.choice(enemy_images), (60, 48))
         self.image_orig.set_colorkey(BLACK)
         self.image = self.image_orig.copy()
         self.rect = self.image.get_rect()
@@ -209,7 +213,6 @@ class Mob(pygame.sprite.Sprite):
     #         self.rect = self.image.get_rect()
     #         self.rect.center = old_center
 
-
     def update(self):
         # self.rotate()
         self.rect.x += self.speedx
@@ -218,7 +221,7 @@ class Mob(pygame.sprite.Sprite):
             self.rect.x = random.randrange(WIDTH - self.rect.width)
             self.rect.y = random.randrange(-100, -40)
             self.speedy = random.randrange(2, 4)
-    
+
     def shoot(self):
         enemy_bullet = Enemy_Bullet(self.rect.centerx, self.rect.top)
         all_sprites.add(enemy_bullet)
@@ -270,7 +273,8 @@ class Enemy_Bullet(pygame.sprite.Sprite):
 background = pygame.image.load(path.join(img_dir, "6776.jpg")).convert()
 background_rect = background.get_rect()
 player_img = pygame.image.load(path.join(img_dir, "playerShip.png")).convert()
-player2_img = pygame.image.load(path.join(img_dir, "player2Ship.png")).convert()
+player2_img = pygame.image.load(
+    path.join(img_dir, "player2Ship.png")).convert()
 bullet_img = pygame.image.load(path.join(img_dir, "laserRed01.png")).convert()
 enemy_bullet_img = pygame.image.load(
     path.join(img_dir, "laserGreen02.png")).convert()
@@ -313,7 +317,6 @@ running = True
 pygame.mixer.music.play(loops=-1)
 
 
-
 # Game loop
 while running:
 
@@ -332,7 +335,7 @@ while running:
         player2 = Player2Ship()
         all_sprites.add(player)
         all_sprites.add(player2)
-        
+
         for i in range(3):
             newmob()
     for event in pygame.event.get():
@@ -341,7 +344,7 @@ while running:
             running = False
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
-                player.shoot()                 #TODO Add a Function alive() so that we check for player being alive
+                player.shoot()  # TODO Add a Function alive() so that we check for player being alive
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LSHIFT:
                 player2.shoot()
@@ -365,9 +368,10 @@ while running:
         progress += 3
         random.choice(expl_sound).play()
 
-    #check to see if a mob hit the player1
-    hits = pygame.sprite.spritecollide(player, mob, True, pygame.sprite.collide_circle)
-    for hit in hits: 
+    # check to see if a mob hit the player1
+    hits = pygame.sprite.spritecollide(
+        player, mob, True, pygame.sprite.collide_circle)
+    for hit in hits:
         hits = pygame.sprite.spritecollide(
             player, mob, True, pygame.sprite.collide_circle)
         # check to see if an enemy bullet hit the player
@@ -386,8 +390,9 @@ while running:
         newmob()
         if player.shield <= 0:
             player.kill()
-    hits = pygame.sprite.spritecollide(player2, mob, True, pygame.sprite.collide_circle)
-    for hit in hits: 
+    hits = pygame.sprite.spritecollide(
+        player2, mob, True, pygame.sprite.collide_circle)
+    for hit in hits:
         player2.shield -= hit.radius * 2
         newmob()
         if player2.shield <= 0:
@@ -395,14 +400,14 @@ while running:
     if player.shield <= 0 and player2.shield <= 0:
         game_over = True
 
-
     # * Draw / render
     screen.fill(BLACK)
     screen.blit(background, background_rect)
     all_sprites.draw(screen)
     draw_text(screen, str(score), 18, WIDTH / 2, 30)
     draw_shield_bar(screen, 5, 5, player.shield)
-    progress_bar(screen, WIDTH / 2 -75, 5, progress) #! CORRECTLY LINK BOSS BATTLE
+    # ! CORRECTLY LINK BOSS BATTLE
+    progress_bar(screen, WIDTH / 2 - 75, 5, progress)
     draw_shield_bar(screen, 370, 5, player2.shield)
     # *after* drawing everything, flip the display
     pygame.display.flip()
