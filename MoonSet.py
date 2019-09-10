@@ -68,6 +68,8 @@ def draw_shield_bar(surf, x, y, pct):
     fill_rect = pygame.Rect(x, y, fill, BAR_HEIGHT)
     pygame.draw.rect(surf, GREEN, fill_rect)
     pygame.draw.rect(surf, WHITE, outline_rect, 2)
+    if fill < 30:
+        pygame.draw.rect(surf, RED, fill_rect)
 
 def progress_bar(surf, x, y, pct):
     if pct < 0:
@@ -239,8 +241,6 @@ class Mob(pygame.sprite.Sprite):
         # shoot_sound.play()
 
 # Bullet for the Player Ship
-
-
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
@@ -259,8 +259,6 @@ class Bullet(pygame.sprite.Sprite):
             self.kill()
 
 # Bullet for the Enemy Ship
-
-
 class Enemy_Bullet(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
@@ -371,7 +369,7 @@ while running:
 
     # yaCollisions
     # check to see if a bullet hit a mob
-    hits = pygame.sprite.groupcollide(mob, bullets, True, True,)
+    hits = pygame.sprite.groupcollide(mob, bullets, True, True)
     for hit in hits:
         newmob()
         score += 50 - hit.radius
@@ -381,32 +379,44 @@ while running:
     #check to see if a mob hit the player1
     hits = pygame.sprite.spritecollide(player, mob, True, pygame.sprite.collide_circle)
     for hit in hits: 
-        hits = pygame.sprite.spritecollide(
-            player, mob, True, pygame.sprite.collide_circle)
-        # check to see if an enemy bullet hit the player
-    # ! This doesn't work. Need collision detection on enemy bullets
-    # hits = pygame.sprite.groupcollide(enemy_bullets, player, True, True)
-    # for hit in hits:
-    #     print("Ouch")
-        # newmob()
-        # score += 50 - hit.radius
-        # random.choice(expl_sound).play()
-
-    # check to see if a mob hit the player
-    for hit in hits:
-
         player.shield -= hit.radius * 2
+        random.choice(expl_sound).play()
         newmob()
         if player.shield <= 0:
             player.kill()
+
+    # check to see if a mob hit the player2
     hits = pygame.sprite.spritecollide(player2, mob, True, pygame.sprite.collide_circle)
     for hit in hits: 
         player2.shield -= hit.radius * 2
         newmob()
+        random.choice(expl_sound).play()
         if player2.shield <= 0:
             player2.kill()
+
     if player.shield <= 0 and player2.shield <= 0:
         game_over = True
+        
+        
+        # check to see if an enemy bullet hit the players
+    hits = pygame.sprite.spritecollide(player, enemy_bullets, True, pygame.sprite.collide_circle)
+    for hit in hits:
+        player.shield -= 20
+        if player.shield <= 0:
+            player.kill()
+
+    hits = pygame.sprite.spritecollide(player2, enemy_bullets, True, pygame.sprite.collide_circle)
+    for hit in hits:
+        player2.shield -= 20
+        if player2.shield <= 0:
+            player2.kill()
+
+    
+
+        
+        
+
+    
 
 
     # * Draw / render
