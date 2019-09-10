@@ -256,6 +256,18 @@ class Bullet(pygame.sprite.Sprite):
         if self.rect.bottom < 0:
             self.kill()
 
+class Rita(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.Surface((50, 100))
+        self.image = pygame.transform.scale(boss_moon, (100, 100))
+        self.image.set_colorkey(BLACK)
+        self.rect = self.image.get_rect()
+        self.rect.centerx = WIDTH / 2
+        self.rect.bottom = HEIGHT / 2
+    # def update(self):
+        
+
 # Bullet for the Enemy Ship
 
 
@@ -289,6 +301,8 @@ game_over_image_rect = game_over_image.get_rect()
 player_img = pygame.image.load(path.join(img_dir, "playerShip.png")).convert()
 player2_img = pygame.image.load(
     path.join(img_dir, "player2Ship.png")).convert()
+boss_moon = pygame.image.load(path.join(img_dir, "moon.png")).convert()
+boss_rita = pygame.image.load(path.join(img_dir, "rita.jpg")).convert()
 bullet_img = pygame.image.load(path.join(img_dir, "laserRed01.png")).convert()
 enemy_bullet_img = pygame.image.load(
     path.join(img_dir, "laserGreen02.png")).convert()
@@ -313,11 +327,12 @@ all_sprites = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
 enemy_bullets = pygame.sprite.Group()
 mob = pygame.sprite.Group()
-bullets = pygame.sprite.Group()
+rita = Rita()
 player = PlayerShip()
 player2 = Player2Ship()
 all_sprites.add(player)
 all_sprites.add(player2)
+
 
 
 # Spawns up to 4 Enemy Ships by added them to the all_sprites group allow them to be drawn
@@ -355,6 +370,10 @@ while running:
         all_sprites.add(player2)
         for i in range(4):
             newmob()
+    if progress >= 20:
+        for a in mob:
+            a.kill()
+        all_sprites.add(rita)
 
     for event in pygame.event.get():
         # check for closing window
