@@ -1,3 +1,20 @@
+'''
+=========
+BUG SPRAY
+=========
+[] Fix Player 2 y-axis limititions
+[] Decrease progress count
+[]
+[] 
+
+=============
+STRETCH GOALS
+=============
+[] Fix Player 2 y-axis limititions
+[] Decrease progress count
+[]
+[] 
+'''
 import pygame
 import random
 from os import path
