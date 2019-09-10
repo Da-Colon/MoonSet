@@ -24,6 +24,7 @@ YELLOW = (255, 255, 0)
 ENEMY_FIRE = pygame.USEREVENT + 1
 pygame.time.set_timer(ENEMY_FIRE, 1000)
 
+
 # Initialize pygame and create window
 pygame.init()
 pygame.mixer.init()
@@ -239,9 +240,9 @@ class Mob(pygame.sprite.Sprite):
         enemy_bullets.add(enemy_bullet)
         # shoot_sound.play()
 
+
+
 # Bullet for the Player Ship
-
-
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
