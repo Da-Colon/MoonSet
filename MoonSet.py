@@ -21,7 +21,7 @@ BLUE = (0, 0, 255)
 YELLOW = (255, 255, 0)
 
 # Custom enemy auto fire event
-ENEMY_FIRE = pygame.USEREVENT + 1
+ENEMY_FIRE = pygame.USEREVENT
 pygame.time.set_timer(ENEMY_FIRE, 1000)
 
 # Initialize pygame and create window
@@ -73,15 +73,25 @@ def progress_bar(surf, x, y, pct):
     fill_rect = pygame.Rect(x, y, fill, BAR_HEIGHT)
     pygame.draw.rect(surf, BLUE, fill_rect)
     pygame.draw.rect(surf, YELLOW, outline_rect, 4)
-# ? The Menu and the Game Over Screen are the same. For now.
+
+
+def show_menu_screen():
+    screen.blit(intro_background, intro_background_rect)
+    # draw_text(screen, "THIS IS THE MENU SCREEN", 64, WIDTH / 2, HEIGHT / 4)
+    pygame.display.flip()
+    waiting = True
+    while waiting:
+        clock.tick(FPS)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+            # Any key press will start the game
+            if event.type == pygame.KEYDOWN:
+                waiting = False
 
 
 def show_gameover_screen():
-    screen.blit(background, background_rect)
-    draw_text(screen, "MoonSet!", 64, WIDTH / 2, HEIGHT / 4)
-    draw_text(screen, "Arrow Keys move, Space to fire",
-              22, WIDTH / 2, HEIGHT / 2)
-    draw_text(screen, "Press C to Continue", 18, WIDTH / 2, HEIGHT * 3 / 4)
+    screen.blit(game_over_image, game_over_image_rect)
     pygame.display.flip()
     waiting = True
     while waiting:
@@ -90,7 +100,8 @@ def show_gameover_screen():
             if event.type == pygame.QUIT:
                 pygame.quit()
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_c:
+                # Space bar to start the game
+                if event.key == pygame.K_SPACE:
                     waiting = False
 
 # Creates sprites for player, mobs, and bullets
@@ -196,7 +207,7 @@ class Player2Ship(pygame.sprite.Sprite):
 class Mob(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        # enemy ships are slightly larger
+        # enemy ships are slightly larger than player ship
         self.image_orig = pygame.transform.scale(
             random.choice(enemy_images), (60, 48))
         self.image_orig.set_colorkey(BLACK)
@@ -208,21 +219,6 @@ class Mob(pygame.sprite.Sprite):
         self.rect.y = random.randrange(-150, -100)
         self.speedy = random.randrange(2, 4)
         self.speedx = random.randrange(-1, 1)
-        # Commenting out rotation related attributes and methods as enemy ships don't need them
-        # self.rot = 0
-        # self.rot_speed = random.randrange(-8, 8)
-        # self.last_update = pygame.time.get_ticks()
-
-    # def rotate(self):
-    #     now = pygame.time.get_ticks()
-    #     if now - self.last_update > 50:
-    #         self.last_update = now
-    #         self.rot = (self.rot + self.rot_speed) % 360
-    #         new_image = pygame.transform.rotate(self.image_orig, self.rot)
-    #         old_center = self.rect.center
-    #         self.image = new_image
-    #         self.rect = self.image.get_rect()
-    #         self.rect.center = old_center
 
     def update(self):
         # self.rotate()g
@@ -284,6 +280,11 @@ class Enemy_Bullet(pygame.sprite.Sprite):
 # Load all game graphics
 background = pygame.image.load(path.join(img_dir, "6776.jpg")).convert()
 background_rect = background.get_rect()
+intro_background = pygame.image.load(
+    path.join(img_dir, 'Intro.png')).convert()
+intro_background_rect = intro_background.get_rect()
+game_over_image = pygame.image.load(path.join(img_dir, "game_over.png"))
+game_over_image_rect = game_over_image.get_rect()
 player_img = pygame.image.load(path.join(img_dir, "playerShip.png")).convert()
 player2_img = pygame.image.load(
     path.join(img_dir, "player2Ship.png")).convert()
@@ -324,7 +325,9 @@ for i in range(4):
 
 score = 0
 progress = 0
-game_over = True
+menu = True
+boss = False
+game_over = False
 running = True
 pygame.mixer.music.play(loops=-1)
 
@@ -334,6 +337,9 @@ while running:
     # keep loop running at the right speed
     clock.tick(FPS)
     # Process input (events)
+    if menu:
+        show_menu_screen()
+        menu = False
     if game_over:
         show_gameover_screen()
         game_over = False
@@ -346,7 +352,6 @@ while running:
         player2 = Player2Ship()
         all_sprites.add(player)
         all_sprites.add(player2)
-
         for i in range(4):
             newmob()
 
@@ -375,7 +380,7 @@ while running:
     # * Update
     all_sprites.update()
 
-    # yaCollisions
+    # Collisions
     # check to see if a bullet hit a mob
     hits = pygame.sprite.groupcollide(mob, bullets, True, True)
     for hit in hits:
@@ -407,7 +412,7 @@ while running:
     if player.shield <= 0 and player2.shield <= 0:
         game_over = True
 
-        # check to see if an enemy bullet hit the players
+    # check to see if an enemy bullet hit the players
     hits = pygame.sprite.spritecollide(
         player, enemy_bullets, True, pygame.sprite.collide_circle)
     for hit in hits:
@@ -424,11 +429,11 @@ while running:
 
     # * Draw / render
     screen.fill(BLACK)
+    screen.blit(intro_background, intro_background_rect)
     screen.blit(background, background_rect)
     all_sprites.draw(screen)
     draw_text(screen, str(score), 18, WIDTH / 2, 30)
     draw_shield_bar(screen, 5, 5, player.shield)
-    # ! CORRECTLY LINK BOSS BATTLE
     progress_bar(screen, WIDTH / 2 - 75, 5, progress)
     draw_shield_bar(screen, 370, 5, player2.shield)
     # *after* drawing everything, flip the display
