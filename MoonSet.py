@@ -100,8 +100,7 @@ def show_gameover_screen():
                     waiting = False
 
 # Creates sprites for player, mobs, and bullets
-
-
+#! PLAYER 1 SETTINGS
 class PlayerShip(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
@@ -147,6 +146,7 @@ class PlayerShip(pygame.sprite.Sprite):
         bullets.add(bullet)
         shoot_sound.play()
 
+#! PLAYER 2 SETTINGS
 class Player2Ship(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
@@ -181,10 +181,10 @@ class Player2Ship(pygame.sprite.Sprite):
         if self.rect.left < 0:
             self.rect.left = 0
         self.rect.y += self.speedy
-        if self.rect.right > HEIGHT:
-            self.rect.right = HEIGHT
-        if self.rect.left < 0:
-            self.rect.left = 0
+        if self.rect.y < 0:
+            self.rect.y = 0
+        if self.rect.bottom > HEIGHT:
+            self.rect.bottom = HEIGHT
 
     def shoot(self):
         bullet = Bullet(self.rect.centerx, self.rect.top)
@@ -192,7 +192,7 @@ class Player2Ship(pygame.sprite.Sprite):
         bullets.add(bullet)
         shoot_sound.play()
 
-
+#! MOB SETTINGS / ENEMY SETTINGS
 class Mob(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
