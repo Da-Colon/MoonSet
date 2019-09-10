@@ -2,14 +2,14 @@
 =========
 BUG SPRAY
 =========
-[x] Fix Player 1 y-axis limitiations
-[] Fix Player 2 y-axis limititions
-[] Decrease progress count
+[x] Fix Player 1 y-axis limitiations - RR
+[] Fix Player 2 y-axis limititions - RR
+[] Decrease progress count - RR
 
 =============
 STRETCH GOALS
 =============
-[] Player health bar color changes as health decreases
+[] Player health bar color changes as health decreases - RR
 '''
 import pygame
 import random
