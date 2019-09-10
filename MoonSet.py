@@ -48,6 +48,17 @@ def draw_shield_bar(surf, x, y, pct):
     pygame.draw.rect(surf, GREEN, fill_rect)
     pygame.draw.rect(surf, WHITE, outline_rect, 2)
 
+def draw_time_bar(surf, x, y, pct):
+    if pct < 0:
+        pct = 0
+    BAR_LENGTH = 150
+    BAR_HEIGHT = 20
+    fill = (pct / 100) * BAR_LENGTH 
+    outline_rect = pygame.Rect(x, y, BAR_LENGTH, BAR_HEIGHT)
+    fill_rect = pygame.Rect(x, y, fill, BAR_HEIGHT)
+    pygame.draw.rect(surf, BLUE, fill_rect)
+    pygame.draw.rect(surf, YELLOW, outline_rect, 4)
+
 class PlayerShip(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
@@ -83,10 +94,10 @@ class PlayerShip(pygame.sprite.Sprite):
         if self.rect.left < 0:
             self.rect.left = 0
         self.rect.y += self.speedy
-        if self.rect.right > HEIGHT:
-            self.rect.right = HEIGHT
-        if self.rect.left < 0:
-            self.rect.left = 0
+        if self.rect.y < 0:
+            self.rect.y = 0
+        if self.rect.bottom > HEIGHT:
+            self.rect.bottom = HEIGHT
 
     def shoot(self):
         bullet = Bullet(self.rect.centerx, self.rect.top)
@@ -201,6 +212,7 @@ all_sprites.add(player)
 for i in range(8):
     newmob()
 score = 0
+progress = 0
 pygame.mixer.music.play(loops=-1)
 
 # Spawns up to 8 Enemy Ships by added them to the all_sprites group allow them to be drawn
@@ -245,7 +257,9 @@ while running:
     for hit in hits:
         newmob()
         score += 50 - hit.radius
+        progress += 3
         random.choice(expl_sound).play()
+
 
     #check to see if a mob hit the player
     hits = pygame.sprite.spritecollide(player, mob, True, pygame.sprite.collide_circle)
@@ -255,13 +269,15 @@ while running:
         if player.shield <= 0:
             game_over = True
 
+    
 
     # * Draw / render
     screen.fill(BLACK)
     screen.blit(background, background_rect)
     all_sprites.draw(screen)
-    draw_text(screen, str(score), 18, WIDTH / 2, 10)
+    draw_text(screen, str(score), 18, WIDTH / 2, 30)
     draw_shield_bar(screen, 5, 5, player.shield)
+    draw_time_bar(screen, WIDTH / 2 -75, 5, progress) #! CORRECTLY LINK BOSS BATTLE
     # *after* drawing everything, flip the display
     pygame.display.flip()
 
