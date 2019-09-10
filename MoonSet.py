@@ -1,3 +1,16 @@
+'''
+=========
+BUG SPRAY
+=========
+[x] Fix Player 1 y-axis limitiations - RR
+[] Fix Player 2 y-axis limititions - RR
+[] Decrease progress count - RR
+
+=============
+STRETCH GOALS
+=============
+[] Player health bar color changes as health decreases - RR
+'''
 import pygame
 import random
 from os import path
@@ -59,6 +72,8 @@ def draw_shield_bar(surf, x, y, pct):
     fill_rect = pygame.Rect(x, y, fill, BAR_HEIGHT)
     pygame.draw.rect(surf, GREEN, fill_rect)
     pygame.draw.rect(surf, WHITE, outline_rect, 2)
+    if fill < 30:
+        pygame.draw.rect(surf, RED, fill_rect)
 
 
 def progress_bar(surf, x, y, pct):
@@ -92,6 +107,7 @@ def show_gameover_screen():
                     waiting = False
 
 # Creates sprites for player, mobs, and bullets
+#! PLAYER 1 SETTINGS
 
 
 class PlayerShip(pygame.sprite.Sprite):
@@ -139,6 +155,8 @@ class PlayerShip(pygame.sprite.Sprite):
         bullets.add(bullet)
         shoot_sound.play()
 
+#! PLAYER 2 SETTINGS
+
 
 class Player2Ship(pygame.sprite.Sprite):
     def __init__(self):
@@ -174,16 +192,18 @@ class Player2Ship(pygame.sprite.Sprite):
         if self.rect.left < 0:
             self.rect.left = 0
         self.rect.y += self.speedy
-        if self.rect.right > HEIGHT:
-            self.rect.right = HEIGHT
-        if self.rect.left < 0:
-            self.rect.left = 0
+        if self.rect.y < 0:
+            self.rect.y = 0
+        if self.rect.bottom > HEIGHT:
+            self.rect.bottom = HEIGHT
 
     def shoot(self):
         bullet = Bullet(self.rect.centerx, self.rect.top)
         all_sprites.add(bullet)
         bullets.add(bullet)
         shoot_sound.play()
+
+#! MOB SETTINGS / ENEMY SETTINGS
 
 
 class Mob(pygame.sprite.Sprite):
@@ -218,7 +238,7 @@ class Mob(pygame.sprite.Sprite):
     #         self.rect.center = old_center
 
     def update(self):
-        # self.rotate()
+        # self.rotate()g
         self.rect.x += self.speedx
         self.rect.y += self.speedy
         if self.rect.top > HEIGHT + 10 or self.rect.left < -25 or self.rect.right > WIDTH + 20:
@@ -322,7 +342,6 @@ running = True
 pygame.mixer.music.play(loops=-1)
 
 
-# Game loop
 while running:
 
     # keep loop running at the right speed
@@ -371,7 +390,7 @@ while running:
 
     # yaCollisions
     # check to see if a bullet hit a mob
-    hits = pygame.sprite.groupcollide(mob, bullets, True, True,)
+    hits = pygame.sprite.groupcollide(mob, bullets, True, True)
     for hit in hits:
         newmob()
         score += 50 - hit.radius
@@ -382,33 +401,39 @@ while running:
     hits = pygame.sprite.spritecollide(
         player, mob, True, pygame.sprite.collide_circle)
     for hit in hits:
-        hits = pygame.sprite.spritecollide(
-            player, mob, True, pygame.sprite.collide_circle)
-        # check to see if an enemy bullet hit the player
-    # ! This doesn't work. Need collision detection on enemy bullets
-    # hits = pygame.sprite.groupcollide(enemy_bullets, player, True, True)
-    # for hit in hits:
-    #     print("Ouch")
-        # newmob()
-        # score += 50 - hit.radius
-        # random.choice(expl_sound).play()
-
-    # check to see if a mob hit the player
-    for hit in hits:
-
         player.shield -= hit.radius * 2
+        random.choice(expl_sound).play()
         newmob()
         if player.shield <= 0:
             player.kill()
+
+    # check to see if a mob hit the player2
     hits = pygame.sprite.spritecollide(
         player2, mob, True, pygame.sprite.collide_circle)
     for hit in hits:
         player2.shield -= hit.radius * 2
         newmob()
+        random.choice(expl_sound).play()
         if player2.shield <= 0:
             player2.kill()
+
     if player.shield <= 0 and player2.shield <= 0:
         game_over = True
+
+        # check to see if an enemy bullet hit the players
+    hits = pygame.sprite.spritecollide(
+        player, enemy_bullets, True, pygame.sprite.collide_circle)
+    for hit in hits:
+        player.shield -= 20
+        if player.shield <= 0:
+            player.kill()
+
+    hits = pygame.sprite.spritecollide(
+        player2, enemy_bullets, True, pygame.sprite.collide_circle)
+    for hit in hits:
+        player2.shield -= 20
+        if player2.shield <= 0:
+            player2.kill()
 
     # * Draw / render
     screen.fill(BLACK)
