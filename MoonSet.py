@@ -20,6 +20,10 @@ GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 YELLOW = (255, 255, 0)
 
+# Custom enemy auto fire event
+ENEMY_FIRE = pygame.USEREVENT + 1
+pygame.time.set_timer(ENEMY_FIRE, 1000)
+
 # Initialize pygame and create window
 pygame.init()
 pygame.mixer.init()
@@ -307,8 +311,8 @@ all_sprites.add(player)
 all_sprites.add(player2)
 
 
-# Spawns up to 3 Enemy Ships by added them to the all_sprites group allow them to be drawn
-for i in range(3):
+# Spawns up to 4 Enemy Ships by added them to the all_sprites group allow them to be drawn
+for i in range(4):
     newmob()
 
 score = 0
@@ -337,8 +341,9 @@ while running:
         all_sprites.add(player)
         all_sprites.add(player2)
 
-        for i in range(3):
+        for i in range(4):
             newmob()
+
     for event in pygame.event.get():
         # check for closing window
         if event.type == pygame.QUIT:
@@ -356,6 +361,10 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_q:
                 running = False
+        # Loop through the Enemy_Fire event and shoot every second
+        if event.type == ENEMY_FIRE:
+            for a in mob:
+                a.shoot()
 
     # * Update
     all_sprites.update()
