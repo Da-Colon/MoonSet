@@ -226,7 +226,7 @@ class Mob(pygame.sprite.Sprite):
 
 
     def update(self):
-        # self.rotate()
+        # self.rotate()g
         self.rect.x += self.speedx
         self.rect.y += self.speedy
         if self.rect.top > HEIGHT + 10 or self.rect.left < -25 or self.rect.right > WIDTH + 20:
@@ -325,7 +325,6 @@ pygame.mixer.music.play(loops=-1)
 
 
 
-# Game loop
 while running:
 
     # keep loop running at the right speed
