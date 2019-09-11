@@ -77,7 +77,7 @@ def progress_bar(surf, x, y, pct):
     pygame.draw.rect(surf, BLUE, fill_rect)
     pygame.draw.rect(surf, YELLOW, outline_rect, 4)
 
-# Intro Screen
+# Menu Screen
 
 
 def show_menu_screen():
@@ -94,7 +94,7 @@ def show_menu_screen():
             if event.type == pygame.KEYDOWN:
                 waiting = False
 
-# Game Completion/Win Screen
+# Win Screen
 
 
 def show_congratulations_screen():
@@ -107,11 +107,11 @@ def show_congratulations_screen():
             if event.type == pygame.QUIT:
                 pygame.quit()
             if event.type == pygame.KEYDOWN:
-                # Space bar to start the game
-                if event.key == pygame.K_SPACE:
+                # Press C to start the game
+                if event.key == pygame.K_c:
                     waiting = False
 
-# Loss Screen
+# Lose Screen
 
 
 def show_gameover_screen():
@@ -414,7 +414,7 @@ intro_background = pygame.image.load(
     path.join(img_dir, 'Intro.png')).convert()
 intro_background_rect = intro_background.get_rect()
 congratulations_image = pygame.image.load(
-    path.join(img_dir, "congratulations2.png"))
+    path.join(img_dir, "congratulations.png"))
 congratulations_image_rect = congratulations_image.get_rect()
 game_over_image = pygame.image.load(path.join(img_dir, "game_over.png"))
 game_over_image_rect = game_over_image.get_rect()
@@ -492,11 +492,25 @@ while running:
     # Process input (events)
     if menu:
         show_menu_screen()
+        all_sprites = pygame.sprite.Group()
+        mob = pygame.sprite.Group()
+        bullets = pygame.sprite.Group()
+        enemy_bullets = pygame.sprite.Group()
+        player = PlayerShip()
+        player2 = Player2Ship()
+        all_sprites.add(player)
+        all_sprites.add(player2)
+        for i in range(4):
+            newmob()
         menu = False
+        congratulations = False
 
     if game_over:
         show_gameover_screen()
         game_over = False
+        rita.shield = 100
+        progress = 0
+        score = 0
         # When we come back from game over screen, we need to reload all the game objects
         all_sprites = pygame.sprite.Group()
         mob = pygame.sprite.Group()
@@ -512,6 +526,10 @@ while running:
     if congratulations:
         show_congratulations_screen()
         congratulations = False
+        menu = True
+        rita.shield = 100
+        progress = 0
+        score = 0
         all_sprites = pygame.sprite.Group()
         mob = pygame.sprite.Group()
         bullets = pygame.sprite.Group()
@@ -536,8 +554,7 @@ while running:
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
                 if player.shield > 0:
-                    player.shoot()  # TODO Add a Function alive() so that we check for player being alive
-        if event.type == pygame.KEYDOWN:
+                    player.shoot()
             if event.key == pygame.K_LSHIFT:
                 if player2.shield > 0:
                     player2.shoot()
