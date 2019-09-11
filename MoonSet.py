@@ -77,7 +77,7 @@ def progress_bar(surf, x, y, pct):
     pygame.draw.rect(surf, BLUE, fill_rect)
     pygame.draw.rect(surf, YELLOW, outline_rect, 4)
 
-# Intro Screen
+# Menu Screen
 
 
 def show_menu_screen():
@@ -94,7 +94,7 @@ def show_menu_screen():
             if event.type == pygame.KEYDOWN:
                 waiting = False
 
-# Game Completion/Win Screen
+# Win Screen
 
 
 def show_congratulations_screen():
@@ -108,11 +108,11 @@ def show_congratulations_screen():
             if event.type == pygame.QUIT:
                 pygame.quit()
             if event.type == pygame.KEYDOWN:
-                # Space bar to start the game
-                if event.key == pygame.K_SPACE:
+                # Press C to start the game
+                if event.key == pygame.K_c:
                     waiting = False
 
-# Loss Screen
+# Lose Screen
 
 
 def show_gameover_screen():
@@ -153,14 +153,14 @@ class PlayerShip(pygame.sprite.Sprite):
         self.speedx = 0
         self.speedy = 0
         keystate = pygame.key.get_pressed()
-        if keystate[pygame.K_LEFT]:
-            self.speedx = -5
-        if keystate[pygame.K_RIGHT]:
-            self.speedx = 5
-        if keystate[pygame.K_UP]:
-            self.speedy = -5
-        if keystate[pygame.K_DOWN]:
-            self.speedy = 5
+        if keystate[pygame.K_a]:
+            self.speedx = -7
+        if keystate[pygame.K_d]:
+            self.speedx = 7
+        if keystate[pygame.K_w]:
+            self.speedy = -7
+        if keystate[pygame.K_s]:
+            self.speedy = 7
         self.rect.x += self.speedx
         if self.rect.right > WIDTH:
             self.rect.right = WIDTH
@@ -202,14 +202,14 @@ class Player2Ship(pygame.sprite.Sprite):
         self.speedx = 0
         self.speedy = 0
         keystate = pygame.key.get_pressed()
-        if keystate[pygame.K_a]:
-            self.speedx = -5
-        if keystate[pygame.K_d]:
-            self.speedx = 5
-        if keystate[pygame.K_w]:
-            self.speedy = -5
-        if keystate[pygame.K_s]:
-            self.speedy = 5
+        if keystate[pygame.K_LEFT]:
+            self.speedx = -7
+        if keystate[pygame.K_RIGHT]:
+            self.speedx = 7
+        if keystate[pygame.K_UP]:
+            self.speedy = -7
+        if keystate[pygame.K_DOWN]:
+            self.speedy = 7
         self.rect.x += self.speedx
         if self.rect.right > WIDTH:
             self.rect.right = WIDTH
@@ -312,7 +312,8 @@ class Rita(pygame.sprite.Sprite):
                 self.speedx = 1
 
     def shoot(self):
-        enemy_bullet = [Enemy_Bullet(self.rect.centerx, self.rect.top), Bullet_dia_right(self.rect.centerx, self.rect.top), Bullet_dia_left(self.rect.centerx, self.rect.top)]
+        enemy_bullet = [Enemy_Bullet(self.rect.centerx, self.rect.top), Bullet_dia_right(
+            self.rect.centerx, self.rect.top), Bullet_dia_left(self.rect.centerx, self.rect.top)]
         for b in enemy_bullet:
             all_sprites.add(enemy_bullet)
             enemy_bullets.add(enemy_bullet)
@@ -338,6 +339,7 @@ class Enemy_Bullet(pygame.sprite.Sprite):
         if self.rect.bottom > HEIGHT:
             self.kill()
 
+
 class Bullet_dia_left(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
@@ -357,6 +359,7 @@ class Bullet_dia_left(pygame.sprite.Sprite):
         # kill if it moves off the bottom of the screen
         if self.rect.bottom > HEIGHT:
             self.kill()
+
 
 class Bullet_dia_right(pygame.sprite.Sprite):
     def __init__(self, x, y):
@@ -379,6 +382,8 @@ class Bullet_dia_right(pygame.sprite.Sprite):
             self.kill()
 
 #! EXPLOSIONS CLASS
+
+
 class Explosion(pygame.sprite.Sprite):
     def __init__(self, center, size):
         pygame.sprite.Sprite.__init__(self)
@@ -403,7 +408,6 @@ class Explosion(pygame.sprite.Sprite):
                 self.rect.center = center
 
 
-
 # Load all game graphics
 background = pygame.image.load(path.join(img_dir, "6776.jpg")).convert()
 background_rect = background.get_rect()
@@ -411,7 +415,7 @@ intro_background = pygame.image.load(
     path.join(img_dir, 'Intro.png')).convert()
 intro_background_rect = intro_background.get_rect()
 congratulations_image = pygame.image.load(
-    path.join(img_dir, "congratulations2.png"))
+    path.join(img_dir, "congratulations.png"))
 congratulations_image_rect = congratulations_image.get_rect()
 game_over_image = pygame.image.load(path.join(img_dir, "game_over.png"))
 game_over_image_rect = game_over_image.get_rect()
@@ -429,17 +433,24 @@ for img in enemy_list:
     enemy_images.append(pygame.image.load(
         path.join(enemy_ship_dir, img)).convert())
 
-#! EXPLOSIONS IMAGE LOADING
+#! EXPLOSIONS IMAGE LOAD
 explosions = {}
 explosions['lg'] = []
 explosions['sm'] = []
+explosions['xl'] = []
+explosions['xxl'] = []
+
 for i in range (8):
     filename = 'regularExplosion0{}.png'.format(i)
     img = pygame.image.load(path.join(img_dir, filename)).convert()
     img.set_colorkey(BLACK)
-    img_lg = pygame.transform.scale(img, (75, 75))
+    img_xl = pygame.transform.scale(img, (100, 100)) #EXPLOSION XL
+    explosions['xl'].append(img_xl)
+    img_xxl = pygame.transform.scale(img, (1000, 1000)) #EXPLOSION XXL
+    explosions['xxl'].append(img_xxl)
+    img_lg = pygame.transform.scale(img, (75, 75)) #EXPLOSION LG
     explosions['lg'].append(img_lg)
-    img_sm = pygame.transform.scale(img, (32, 32))
+    img_sm = pygame.transform.scale(img, (32, 32)) #EXPLOSION
     explosions['sm'].append(img_sm)
 
 # Load all game sounds 
@@ -447,7 +458,8 @@ shoot_sound = pygame.mixer.Sound(path.join(snd_dir, 'Laser_Shoot.wav'))
 expl_sound = []
 for snd in ['expl1.wav', 'expl2.wav']:
     expl_sound.append(pygame.mixer.Sound(path.join(snd_dir, snd)))
-def main_music(): 
+def main_music():
+    pygame.mixer.music.stop() 
     pygame.mixer.music.load(path.join(snd_dir, 'Lunar Harvest v1_0.mp3'))
     pygame.mixer.music.play() 
 def boss_battle():
@@ -495,7 +507,6 @@ end_music = False
 music_on = False
 running = True
 main_music()
-
 count = 0
 while running:
 
@@ -504,11 +515,24 @@ while running:
     # Process input (events)
     if menu:
         show_menu_screen()
+        all_sprites = pygame.sprite.Group()
+        mob = pygame.sprite.Group()
+        bullets = pygame.sprite.Group()
+        enemy_bullets = pygame.sprite.Group()
+        player = PlayerShip()
+        player2 = Player2Ship()
+        all_sprites.add(player)
+        all_sprites.add(player2)
+        for i in range(4):
+            newmob()
         menu = False
-
+        congratulations = False
     if game_over:
         show_gameover_screen()
         game_over = False
+        rita.shield = 100
+        progress = 0
+        score = 0
         # When we come back from game over screen, we need to reload all the game objects
         all_sprites = pygame.sprite.Group()
         mob = pygame.sprite.Group()
@@ -524,6 +548,10 @@ while running:
     if congratulations:
         show_congratulations_screen()
         congratulations = False
+        menu = True
+        rita.shield = 100
+        progress = 0
+        score = 0
         all_sprites = pygame.sprite.Group()
         mob = pygame.sprite.Group()
         bullets = pygame.sprite.Group()
@@ -535,7 +563,8 @@ while running:
         for i in range(4):
             newmob()
 
-    if progress >= 20:
+    #BOSS SPAWN / RITA SPAWN
+    if progress >= 100:
         for a in mob:
             a.kill()
         all_sprites.add(rita)
@@ -547,11 +576,11 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
-                if player.shield > 0:
-                    player.shoot()  # TODO Add a Function alive() so that we check for player being alive
-        if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LSHIFT:
+                if player.shield > 0:
+                    player.shoot() 
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
                 if player2.shield > 0:
                     player2.shoot()
         if event.type == pygame.KEYDOWN:
@@ -565,14 +594,14 @@ while running:
         if event.type == ENEMY_FIRE:
             for a in mob:
                 a.shoot()
-        if progress >= 20:
+        if progress >= 100:
             if rita.shield > 0:
                 if event.type == BOSS_FIRE:
-                    rita.shoot() 
+                    rita.shoot()
 
-    # * Update
+    # * Update 
     all_sprites.update()
-    if progress >= 20:
+    if progress >= 100: #BOSS SPAWN UPDATE / RITA SPAWN UPDATE
         rita_group.update()
         if not music_on: 
             boss_battle()
@@ -586,16 +615,33 @@ while running:
         score += 50 - hit.radius
         progress += 3
         random.choice(expl_sound).play()
-        expl = Explosion(hit.rect.center, 'lg') #! EXPLOSIONS HIT
+        expl = Explosion(hit.rect.center, 'lg')  # ! EXPLOSIONS HIT
         all_sprites.add(expl)
 
-    # check to see if a bullet hit a boss
+    #! BOSS HIT
+    # check to see if a bullet hit a boss 
     hits = pygame.sprite.groupcollide(
         rita_group, bullets, True, pygame.sprite.collide_circle)
     for hit in hits:
-        rita.shield -= 10
+        rita.shield -= 5
+        if rita.shield == 0:
+            expl3 = Explosion(hit.rect.center, 'xxl')
+            random.choice(expl_sound).play()
+            all_sprites.add(expl3)
+        else:
+            expl2 = Explosion(hit.rect.center, 'xl')
+            random.choice(expl_sound).play()
+            all_sprites.add(expl2)
+        
+        
+        
+    def test_boom():
+        expl2 = Explosion(hit.rect.center, 'xl')
+        random.choice(expl_sound).play()
+        all_sprites.add(expl2)
 
     # check to see if a mob hit the player1
+    #! Player 1 mob hit
     hits = pygame.sprite.spritecollide(
         player, mob, True, pygame.sprite.collide_circle)
     for hit in hits:
@@ -605,6 +651,7 @@ while running:
             player.kill()
 
     # check to see if a mob hit the player2
+    #! Player 2 mob hit
     hits = pygame.sprite.spritecollide(
         player2, mob, True, pygame.sprite.collide_circle)
     for hit in hits:
@@ -614,24 +661,31 @@ while running:
             player2.kill()
 
         # check to see if boss hits the player
+        #! Player 1 Boss hit
     hits = pygame.sprite.spritecollide(
         player, rita_group, True, pygame.sprite.collide_circle)
     for hit in hits:
         player.shield -= hit.radius * 2
-
         if player.shield <= 0:
             player.kill()
 
         # check to see if a boss hit the player2
+        #! Player 2 boss hit
     hits = pygame.sprite.spritecollide(
         player2, rita_group, True, pygame.sprite.collide_circle)
     for hit in hits:
         player2.shield -= hit.radius * 2
         if player2.shield <= 0:
-            player2.kill()
-
+            player2.kill() 
+    
     if player.shield <= 0 and player2.shield <= 0:
+        # Reset the game progress when both players die
+        progress = 0
+        score = 0
+        main_music()
         game_over = True
+ 
+    #! DEATH OF RITA
 
     if rita.shield <= 0:
         rita.kill()
@@ -639,17 +693,21 @@ while running:
         
 
     # check to see if an enemy bullet hit the players
+    #! MOB BULLET HIT PLAYER 1
     hits = pygame.sprite.spritecollide(
         player, enemy_bullets, True, pygame.sprite.collide_circle)
     for hit in hits:
-        player.shield -= 20
+        player.shield -= 10 #PLAYER 1 HEALTH
+        test_boom()#! EXPLOSION 
         if player.shield <= 0:
             player.kill()
 
+    #! MOB BULLET HIT PLAYER 2
     hits = pygame.sprite.spritecollide(
         player2, enemy_bullets, True, pygame.sprite.collide_circle)
     for hit in hits:
-        player2.shield -= 20
+        player2.shield -= 10 #PLAYER 2 HEALTH
+        test_boom() #! EXPLOSION 
         if player2.shield <= 0:
             player2.kill()
 
