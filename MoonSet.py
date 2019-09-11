@@ -153,13 +153,13 @@ class PlayerShip(pygame.sprite.Sprite):
         self.speedy = 0
         keystate = pygame.key.get_pressed()
         if keystate[pygame.K_a]:
-            self.speedx = -5
+            self.speedx = -7
         if keystate[pygame.K_d]:
-            self.speedx = 5
+            self.speedx = 7
         if keystate[pygame.K_w]:
-            self.speedy = -5
+            self.speedy = -7
         if keystate[pygame.K_s]:
-            self.speedy = 5
+            self.speedy = 7
         self.rect.x += self.speedx
         if self.rect.right > WIDTH:
             self.rect.right = WIDTH
@@ -202,13 +202,13 @@ class Player2Ship(pygame.sprite.Sprite):
         self.speedy = 0
         keystate = pygame.key.get_pressed()
         if keystate[pygame.K_LEFT]:
-            self.speedx = -5
+            self.speedx = -7
         if keystate[pygame.K_RIGHT]:
-            self.speedx = 5
+            self.speedx = 7
         if keystate[pygame.K_UP]:
-            self.speedy = -5
+            self.speedy = -7
         if keystate[pygame.K_DOWN]:
-            self.speedy = 5
+            self.speedy = 7
         self.rect.x += self.speedx
         if self.rect.right > WIDTH:
             self.rect.right = WIDTH
@@ -486,7 +486,7 @@ game_over = False
 boss = False
 running = True
 pygame.mixer.music.play(loops=-1)
-
+delay = 5  
 count = 0
 while running:
 
@@ -540,7 +540,7 @@ while running:
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LSHIFT:
                 if player.shield > 0:
-                    player.shoot()  # TODO Add a Function alive() so that we check for player being alive
+                    player.shoot() 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
                 if player2.shield > 0:
@@ -594,8 +594,13 @@ while running:
         
         
         
+    def test_boom():
+        expl2 = Explosion(hit.rect.center, 'xl')
+        random.choice(expl_sound).play()
+        all_sprites.add(expl2)
 
     # check to see if a mob hit the player1
+    #! Player 1 mob hit
     hits = pygame.sprite.spritecollide(
         player, mob, True, pygame.sprite.collide_circle)
     for hit in hits:
@@ -605,6 +610,7 @@ while running:
             player.kill()
 
     # check to see if a mob hit the player2
+    #! Player 2 mob hit
     hits = pygame.sprite.spritecollide(
         player2, mob, True, pygame.sprite.collide_circle)
     for hit in hits:
@@ -614,46 +620,50 @@ while running:
             player2.kill()
 
         # check to see if boss hits the player
+        #! Player 1 Boss hit
     hits = pygame.sprite.spritecollide(
         player, rita_group, True, pygame.sprite.collide_circle)
     for hit in hits:
         player.shield -= hit.radius * 2
-
         if player.shield <= 0:
             player.kill()
 
         # check to see if a boss hit the player2
+        #! Player 2 boss hit
     hits = pygame.sprite.spritecollide(
         player2, rita_group, True, pygame.sprite.collide_circle)
     for hit in hits:
         player2.shield -= hit.radius * 2
         if player2.shield <= 0:
-            player2.kill()
-
+            player2.kill() 
+    
     if player.shield <= 0 and player2.shield <= 0:
         game_over = True
 
     #! DEATH OF RITA
+
     if rita.shield <= 0:
         rita.kill()
-        #TODO END SEQUENCE / FIREWORK SEQUENCE (NOT NECC. FIREWORKS)
-
-        congratulations = True
+        #congratulations = True
 
         
 
     # check to see if an enemy bullet hit the players
+    #! MOB BULLET HIT PLAYER 1
     hits = pygame.sprite.spritecollide(
         player, enemy_bullets, True, pygame.sprite.collide_circle)
     for hit in hits:
-        player.shield -= 20
+        player.shield -= 10 #PLAYER 1 HEALTH
+        test_boom()#! EXPLOSION 
         if player.shield <= 0:
             player.kill()
 
+    #! MOB BULLET HIT PLAYER 2
     hits = pygame.sprite.spritecollide(
         player2, enemy_bullets, True, pygame.sprite.collide_circle)
     for hit in hits:
-        player2.shield -= 20
+        player2.shield -= 10 #PLAYER 2 HEALTH
+        test_boom() #! EXPLOSION 
         if player2.shield <= 0:
             player2.kill()
 
