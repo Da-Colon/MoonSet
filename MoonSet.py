@@ -157,6 +157,7 @@ class PlayerShip(pygame.sprite.Sprite):
         bullets.add(bullet)
         shoot_sound.play()
 
+
 #! PLAYER 2 SETTINGS
 
 
@@ -288,19 +289,14 @@ class Rita(pygame.sprite.Sprite):
                 self.speedx = -1
             if self.rect.left == 0:
                 self.speedx = 1
-            # if self.rect.centerx == WIDTH / 2:
-            #     self.speedx = 1
-
-        
-        
 
     def shoot(self):
-        enemy_bullet = Enemy_Bullet(self.rect.centerx, self.rect.top)
-        all_sprites.add(enemy_bullet)
-        enemy_bullets.add(enemy_bullet)
+        enemy_bullet = [Enemy_Bullet(self.rect.centerx, self.rect.top), Bullet_dia_right(self.rect.centerx, self.rect.top), Bullet_dia_left(self.rect.centerx, self.rect.top)]
+        for b in enemy_bullet:
+            all_sprites.add(enemy_bullet)
+            enemy_bullets.add(enemy_bullet)
 
 # Bullet for the Enemy Ship
-
 class Enemy_Bullet(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
@@ -319,6 +315,45 @@ class Enemy_Bullet(pygame.sprite.Sprite):
         if self.rect.bottom > HEIGHT:
             self.kill()
 
+class Bullet_dia_left(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.Surface((10, 20))
+        self.image = enemy_bullet_img
+        self.image.set_colorkey(BLACK)
+        self.rect = self.image.get_rect()
+        # moves the bullets to the front of the enemy ship
+        self.rect.bottom = y + 100
+        self.rect.centerx = x
+        self.speedy = 10
+        self.speedx = -5
+
+    def update(self):
+        self.rect.y += self.speedy
+        self.rect.x += self.speedx
+        # kill if it moves off the bottom of the screen
+        if self.rect.bottom > HEIGHT:
+            self.kill()
+
+class Bullet_dia_right(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.Surface((10, 20))
+        self.image = enemy_bullet_img
+        self.image.set_colorkey(BLACK)
+        self.rect = self.image.get_rect()
+        # moves the bullets to the front of the enemy ship
+        self.rect.bottom = y + 100
+        self.rect.centerx = x
+        self.speedy = 10
+        self.speedx = 5
+
+    def update(self):
+        self.rect.y += self.speedy
+        self.rect.x += self.speedx
+        # kill if it moves off the bottom of the screen
+        if self.rect.bottom > HEIGHT:
+            self.kill()
 
 # Load all game graphics
 background = pygame.image.load(path.join(img_dir, "6776.jpg")).convert()
@@ -432,7 +467,7 @@ while running:
         if progress >= 20:  
             if rita.shield > 0:  
                 if event.type == BOSS_FIRE:
-                    rita.shoot()
+                    rita.shoot() 
 
     # * Update
     all_sprites.update()
