@@ -311,7 +311,8 @@ class Rita(pygame.sprite.Sprite):
                 self.speedx = 1
 
     def shoot(self):
-        enemy_bullet = [Enemy_Bullet(self.rect.centerx, self.rect.top), Bullet_dia_right(self.rect.centerx, self.rect.top), Bullet_dia_left(self.rect.centerx, self.rect.top)]
+        enemy_bullet = [Enemy_Bullet(self.rect.centerx, self.rect.top), Bullet_dia_right(
+            self.rect.centerx, self.rect.top), Bullet_dia_left(self.rect.centerx, self.rect.top)]
         for b in enemy_bullet:
             all_sprites.add(enemy_bullet)
             enemy_bullets.add(enemy_bullet)
@@ -337,6 +338,7 @@ class Enemy_Bullet(pygame.sprite.Sprite):
         if self.rect.bottom > HEIGHT:
             self.kill()
 
+
 class Bullet_dia_left(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
@@ -356,6 +358,7 @@ class Bullet_dia_left(pygame.sprite.Sprite):
         # kill if it moves off the bottom of the screen
         if self.rect.bottom > HEIGHT:
             self.kill()
+
 
 class Bullet_dia_right(pygame.sprite.Sprite):
     def __init__(self, x, y):
@@ -378,6 +381,8 @@ class Bullet_dia_right(pygame.sprite.Sprite):
             self.kill()
 
 #! EXPLOSIONS CLASS
+
+
 class Explosion(pygame.sprite.Sprite):
     def __init__(self, center, size):
         pygame.sprite.Sprite.__init__(self)
@@ -400,7 +405,6 @@ class Explosion(pygame.sprite.Sprite):
                 center = self.rect.center
                 self.image = explosions[self.size][self.frame]
                 self.rect.center = center
-
 
 
 # Load all game graphics
@@ -433,7 +437,7 @@ for img in enemy_list:
 explosions = {}
 explosions['lg'] = []
 explosions['sm'] = []
-for i in range (8):
+for i in range(8):
     filename = 'regularExplosion0{}.png'.format(i)
     img = pygame.image.load(path.join(img_dir, filename)).convert()
     img.set_colorkey(BLACK)
@@ -551,7 +555,7 @@ while running:
         if progress >= 20:
             if rita.shield > 0:
                 if event.type == BOSS_FIRE:
-                    rita.shoot() 
+                    rita.shoot()
 
     # * Update
     all_sprites.update()
@@ -566,7 +570,7 @@ while running:
         score += 50 - hit.radius
         progress += 3
         random.choice(expl_sound).play()
-        expl = Explosion(hit.rect.center, 'lg') #! EXPLOSIONS HIT
+        expl = Explosion(hit.rect.center, 'lg')  # ! EXPLOSIONS HIT
         all_sprites.add(expl)
 
     # check to see if a bullet hit a boss
@@ -611,6 +615,9 @@ while running:
             player2.kill()
 
     if player.shield <= 0 and player2.shield <= 0:
+        # Reset the game progress when both players die
+        progress = 0
+        score = 0
         game_over = True
 
     if rita.shield <= 0:
