@@ -75,6 +75,8 @@ def progress_bar(surf, x, y, pct):
     pygame.draw.rect(surf, BLUE, fill_rect)
     pygame.draw.rect(surf, YELLOW, outline_rect, 4)
 
+# Intro Screen
+
 
 def show_menu_screen():
     screen.blit(intro_background, intro_background_rect)
@@ -89,6 +91,25 @@ def show_menu_screen():
             # Any key press will start the game
             if event.type == pygame.KEYDOWN:
                 waiting = False
+
+# Game Completion/Win Screen
+
+
+def show_congratulations_screen():
+    screen.blit(congratulations_image, congratulations_image_rect)
+    pygame.display.flip()
+    waiting = True
+    while waiting:
+        clock.tick(FPS)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+            if event.type == pygame.KEYDOWN:
+                # Space bar to start the game
+                if event.key == pygame.K_SPACE:
+                    waiting = False
+
+# Loss Screen
 
 
 def show_gameover_screen():
@@ -237,7 +258,6 @@ class Mob(pygame.sprite.Sprite):
         # shoot_sound.play()
 
 
-
 # Bullet for the Player Ship
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, x, y):
@@ -256,6 +276,7 @@ class Bullet(pygame.sprite.Sprite):
         if self.rect.bottom < 0:
             self.kill()
 
+
 class Rita(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
@@ -266,7 +287,7 @@ class Rita(pygame.sprite.Sprite):
         self.rect.centerx = WIDTH / 2
         self.rect.bottom = HEIGHT / 2
     # def update(self):
-        
+
 
 # Bullet for the Enemy Ship
 
@@ -296,6 +317,9 @@ background_rect = background.get_rect()
 intro_background = pygame.image.load(
     path.join(img_dir, 'Intro.png')).convert()
 intro_background_rect = intro_background.get_rect()
+congratulations_image = pygame.image.load(
+    path.join(img_dir, "congratulations.png"))
+congratulations_image_rect = congratulations_image.get_rect()
 game_over_image = pygame.image.load(path.join(img_dir, "game_over.png"))
 game_over_image_rect = game_over_image.get_rect()
 player_img = pygame.image.load(path.join(img_dir, "playerShip.png")).convert()
@@ -334,20 +358,24 @@ all_sprites.add(player)
 all_sprites.add(player2)
 
 
-
 # Spawns up to 4 Enemy Ships by added them to the all_sprites group allow them to be drawn
 for i in range(4):
     newmob()
 
+
 score = 0
 progress = 0
+# Menu controls the Introduction screen
 menu = True
-boss = False
+# Congratulations controls the player win screen display
+congratulations = False
+# game_over is the screen that displays if the player loses
 game_over = False
+boss = False
 running = True
 pygame.mixer.music.play(loops=-1)
 
-
+count = 0
 while running:
 
     # keep loop running at the right speed
@@ -356,6 +384,7 @@ while running:
     if menu:
         show_menu_screen()
         menu = False
+
     if game_over:
         show_gameover_screen()
         game_over = False
@@ -370,10 +399,33 @@ while running:
         all_sprites.add(player2)
         for i in range(4):
             newmob()
+
+    if congratulations:
+        show_congratulations_screen()
+        congratulations = False
+        all_sprites = pygame.sprite.Group()
+        mob = pygame.sprite.Group()
+        bullets = pygame.sprite.Group()
+        enemy_bullets = pygame.sprite.Group()
+        player = PlayerShip()
+        player2 = Player2Ship()
+        all_sprites.add(player)
+        all_sprites.add(player2)
+        for i in range(4):
+            newmob()
+
+    # ! When the boss dies, switch congratulations to True. Below is pseudo code
+    '''
+    If the boss is dead:
+        congratulations = True
+    '''
+
     if progress >= 20:
-        for a in mob:
-            a.kill()
-        all_sprites.add(rita)
+        # for a in mob:
+        #     a.kill()
+        # all_sprites.add(rita)
+        congratulations = True
+        # menu = True
 
     for event in pygame.event.get():
         # check for closing window
