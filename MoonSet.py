@@ -377,6 +377,32 @@ class Bullet_dia_right(pygame.sprite.Sprite):
         if self.rect.bottom > HEIGHT:
             self.kill()
 
+#! EXPLOSIONS CLASS
+class Explosion(pygame.sprite.Sprite):
+    def __init__(self, center, size):
+        pygame.sprite.Sprite.__init__(self)
+        self.size = size
+        self.image = explosions[self.size][0]
+        self.rect = self.image.get_rect()
+        self.rect.center = center
+        self.frame = 0
+        self.last_update = pygame.time.get_ticks()
+        self.frame_rate = 60
+
+    def update(self):
+        now = pygame.time.get_ticks()
+        if now - self.last_update > self.frame_rate:
+            self.last_update = now
+            self.frame += 1
+            if self.frame == len(explosions[self.size]):
+                self.kill()
+            else:
+                center = self.rect.center
+                self.image = explosions[self.size][self.frame]
+                self.rect.center = center
+
+
+
 # Load all game graphics
 background = pygame.image.load(path.join(img_dir, "6776.jpg")).convert()
 background_rect = background.get_rect()
@@ -403,6 +429,18 @@ for img in enemy_list:
     enemy_images.append(pygame.image.load(
         path.join(enemy_ship_dir, img)).convert())
 
+#! EXPLOSIONS IMAGE LOADING
+explosions = {}
+explosions['lg'] = []
+explosions['sm'] = []
+for i in range (8):
+    filename = 'regularExplosion0{}.png'.format(i)
+    img = pygame.image.load(path.join(img_dir, filename)).convert()
+    img.set_colorkey(BLACK)
+    img_lg = pygame.transform.scale(img, (75, 75))
+    explosions['lg'].append(img_lg)
+    img_sm = pygame.transform.scale(img, (32, 32))
+    explosions['sm'].append(img_sm)
 # Load all game sounds
 shoot_sound = pygame.mixer.Sound(path.join(snd_dir, 'Laser_Shoot.wav'))
 expl_sound = []
@@ -528,6 +566,8 @@ while running:
         score += 50 - hit.radius
         progress += 3
         random.choice(expl_sound).play()
+        expl = Explosion(hit.rect.center, 'lg') #! EXPLOSIONS HIT
+        all_sprites.add(expl)
 
     # check to see if a bullet hit a boss
     hits = pygame.sprite.groupcollide(
