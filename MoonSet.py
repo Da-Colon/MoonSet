@@ -77,7 +77,7 @@ def progress_bar(surf, x, y, pct):
     pygame.draw.rect(surf, BLUE, fill_rect)
     pygame.draw.rect(surf, YELLOW, outline_rect, 4)
 
-# Intro Screen
+# Menu Screen
 
 
 def show_menu_screen():
@@ -94,7 +94,7 @@ def show_menu_screen():
             if event.type == pygame.KEYDOWN:
                 waiting = False
 
-# Game Completion/Win Screen
+# Win Screen
 
 
 def show_congratulations_screen():
@@ -107,11 +107,11 @@ def show_congratulations_screen():
             if event.type == pygame.QUIT:
                 pygame.quit()
             if event.type == pygame.KEYDOWN:
-                # Space bar to start the game
-                if event.key == pygame.K_SPACE:
+                # Press C to start the game
+                if event.key == pygame.K_c:
                     waiting = False
 
-# Loss Screen
+# Lose Screen
 
 
 def show_gameover_screen():
@@ -311,7 +311,8 @@ class Rita(pygame.sprite.Sprite):
                 self.speedx = 1
 
     def shoot(self):
-        enemy_bullet = [Enemy_Bullet(self.rect.centerx, self.rect.top), Bullet_dia_right(self.rect.centerx, self.rect.top), Bullet_dia_left(self.rect.centerx, self.rect.top)]
+        enemy_bullet = [Enemy_Bullet(self.rect.centerx, self.rect.top), Bullet_dia_right(
+            self.rect.centerx, self.rect.top), Bullet_dia_left(self.rect.centerx, self.rect.top)]
         for b in enemy_bullet:
             all_sprites.add(enemy_bullet)
             enemy_bullets.add(enemy_bullet)
@@ -337,6 +338,7 @@ class Enemy_Bullet(pygame.sprite.Sprite):
         if self.rect.bottom > HEIGHT:
             self.kill()
 
+
 class Bullet_dia_left(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
@@ -356,6 +358,7 @@ class Bullet_dia_left(pygame.sprite.Sprite):
         # kill if it moves off the bottom of the screen
         if self.rect.bottom > HEIGHT:
             self.kill()
+
 
 class Bullet_dia_right(pygame.sprite.Sprite):
     def __init__(self, x, y):
@@ -378,6 +381,8 @@ class Bullet_dia_right(pygame.sprite.Sprite):
             self.kill()
 
 #! EXPLOSIONS CLASS
+
+
 class Explosion(pygame.sprite.Sprite):
     def __init__(self, center, size):
         pygame.sprite.Sprite.__init__(self)
@@ -402,7 +407,6 @@ class Explosion(pygame.sprite.Sprite):
                 self.rect.center = center
 
 
-
 # Load all game graphics
 background = pygame.image.load(path.join(img_dir, "6776.jpg")).convert()
 background_rect = background.get_rect()
@@ -410,7 +414,7 @@ intro_background = pygame.image.load(
     path.join(img_dir, 'Intro.png')).convert()
 intro_background_rect = intro_background.get_rect()
 congratulations_image = pygame.image.load(
-    path.join(img_dir, "congratulations2.png"))
+    path.join(img_dir, "congratulations.png"))
 congratulations_image_rect = congratulations_image.get_rect()
 game_over_image = pygame.image.load(path.join(img_dir, "game_over.png"))
 game_over_image_rect = game_over_image.get_rect()
@@ -495,11 +499,25 @@ while running:
     # Process input (events)
     if menu:
         show_menu_screen()
+        all_sprites = pygame.sprite.Group()
+        mob = pygame.sprite.Group()
+        bullets = pygame.sprite.Group()
+        enemy_bullets = pygame.sprite.Group()
+        player = PlayerShip()
+        player2 = Player2Ship()
+        all_sprites.add(player)
+        all_sprites.add(player2)
+        for i in range(4):
+            newmob()
         menu = False
+        congratulations = False
 
     if game_over:
         show_gameover_screen()
         game_over = False
+        rita.shield = 100
+        progress = 0
+        score = 0
         # When we come back from game over screen, we need to reload all the game objects
         all_sprites = pygame.sprite.Group()
         mob = pygame.sprite.Group()
@@ -515,6 +533,10 @@ while running:
     if congratulations:
         show_congratulations_screen()
         congratulations = False
+        menu = True
+        rita.shield = 100
+        progress = 0
+        score = 0
         all_sprites = pygame.sprite.Group()
         mob = pygame.sprite.Group()
         bullets = pygame.sprite.Group()
@@ -559,7 +581,7 @@ while running:
         if progress >= 100:
             if rita.shield > 0:
                 if event.type == BOSS_FIRE:
-                    rita.shoot() 
+                    rita.shoot()
 
     # * Update 
     all_sprites.update()
@@ -574,7 +596,7 @@ while running:
         score += 50 - hit.radius
         progress += 3
         random.choice(expl_sound).play()
-        expl = Explosion(hit.rect.center, 'lg') #! EXPLOSIONS HIT
+        expl = Explosion(hit.rect.center, 'lg')  # ! EXPLOSIONS HIT
         all_sprites.add(expl)
 
     #! BOSS HIT
@@ -638,6 +660,9 @@ while running:
             player2.kill() 
     
     if player.shield <= 0 and player2.shield <= 0:
+        # Reset the game progress when both players die
+        progress = 0
+        score = 0
         game_over = True
 
     #! DEATH OF RITA
