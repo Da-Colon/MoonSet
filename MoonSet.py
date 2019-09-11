@@ -555,13 +555,6 @@ while running:
         all_sprites.add(rita)
         rita_group.add(rita)
 
-    # We want to make sure these objects are removed from the game when they "die"
-    if player.shield <= 0:
-        player.kill()
-
-    if player2.shield <= 0:
-        player2.kill()
-
     for event in pygame.event.get():
         # check for closing window
         if event.type == pygame.QUIT:
@@ -574,10 +567,6 @@ while running:
             if event.key == pygame.K_SPACE:
                 if player2.shield > 0:
                     player2.shoot()
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_t:
-                for a in mob:
-                    a.shoot()
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_q:
                 running = False
@@ -592,6 +581,7 @@ while running:
 
     # * Update 
     all_sprites.update()
+
     if progress >= 100: #BOSS SPAWN UPDATE / RITA SPAWN UPDATE
         rita_group.update()
 
@@ -603,7 +593,8 @@ while running:
         score += 50 - hit.radius
         progress += 3
         random.choice(expl_sound).play()
-        expl = Explosion(hit.rect.center, 'lg')  # ! EXPLOSIONS HIT
+        # ! EXPLOSIONS HIT
+        expl = Explosion(hit.rect.center, 'lg')  
         all_sprites.add(expl)
 
     #! BOSS HIT
@@ -620,8 +611,6 @@ while running:
             expl2 = Explosion(hit.rect.center, 'xl')
             random.choice(expl_sound).play()
             all_sprites.add(expl2)
-        
-        
         
     def test_boom():
         expl2 = Explosion(hit.rect.center, 'xl')
@@ -648,8 +637,8 @@ while running:
         if player2.shield <= 0:
             player2.kill()
 
-        # check to see if boss hits the player
-        #! Player 1 Boss hit
+    # check to see if boss hits the player
+    #! Player 1 Boss hit
     hits = pygame.sprite.spritecollide(
         player, rita_group, True, pygame.sprite.collide_circle)
     for hit in hits:
@@ -657,8 +646,8 @@ while running:
         if player.shield <= 0:
             player.kill()
 
-        # check to see if a boss hit the player2
-        #! Player 2 boss hit
+    # check to see if a boss hit the player2
+    #! Player 2 boss hit
     hits = pygame.sprite.spritecollide(
         player2, rita_group, True, pygame.sprite.collide_circle)
     for hit in hits:
@@ -676,10 +665,9 @@ while running:
 
     if rita.shield <= 0:
         rita.kill()
-        #congratulations = True
+        congratulations = True
 
         
-
     # check to see if an enemy bullet hit the players
     #! MOB BULLET HIT PLAYER 1
     hits = pygame.sprite.spritecollide(
@@ -696,8 +684,6 @@ while running:
     for hit in hits:
         player2.shield -= 10 #PLAYER 2 HEALTH
         test_boom() #! EXPLOSION 
-        if player2.shield <= 0:
-            player2.kill()
 
     # * Draw / render
     screen.fill(BLACK)
