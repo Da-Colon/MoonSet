@@ -98,6 +98,7 @@ def show_menu_screen():
 
 
 def show_congratulations_screen():
+    end_game()   
     screen.blit(congratulations_image, congratulations_image_rect)
     pygame.display.flip()
     waiting = True
@@ -418,7 +419,6 @@ player_img = pygame.image.load(path.join(img_dir, "playerShip.png")).convert()
 player2_img = pygame.image.load(
     path.join(img_dir, "player2Ship.png")).convert()
 boss_moon = pygame.image.load(path.join(img_dir, "moon.png")).convert()
-boss_rita = pygame.image.load(path.join(img_dir, "rita.jpg")).convert()
 bullet_img = pygame.image.load(path.join(img_dir, "laserRed01.png")).convert()
 enemy_bullet_img = pygame.image.load(
     path.join(img_dir, "laserGreen02.png")).convert()
@@ -441,13 +441,27 @@ for i in range (8):
     explosions['lg'].append(img_lg)
     img_sm = pygame.transform.scale(img, (32, 32))
     explosions['sm'].append(img_sm)
-# Load all game sounds
+
+# Load all game sounds 
 shoot_sound = pygame.mixer.Sound(path.join(snd_dir, 'Laser_Shoot.wav'))
 expl_sound = []
 for snd in ['expl1.wav', 'expl2.wav']:
     expl_sound.append(pygame.mixer.Sound(path.join(snd_dir, snd)))
-pygame.mixer.music.load(path.join(snd_dir, 'Lunar Harvest v1_0.mp3'))
+def main_music(): 
+    pygame.mixer.music.load(path.join(snd_dir, 'Lunar Harvest v1_0.mp3'))
+    pygame.mixer.music.play() 
+def boss_battle():
+    pygame.mixer.music.stop()
+    pygame.mixer.music.load(path.join(snd_dir, 'powerrangers.mp3'))
+    pygame.mixer.music.play()
+def end_game():
+    pygame.mixer.music.stop()
+    pygame.mixer.music.load(path.join(snd_dir, 'fanfare.mp3'))
+    pygame.mixer.music.play()
 pygame.mixer.music.set_volume(0.6)
+
+
+
 
 
 # Define sprite groups
@@ -477,8 +491,10 @@ congratulations = False
 # game_over is the screen that displays if the player loses
 game_over = False
 boss = False
+end_music = False
+music_on = False
 running = True
-pygame.mixer.music.play(loops=-1)
+main_music()
 
 count = 0
 while running:
@@ -524,6 +540,7 @@ while running:
             a.kill()
         all_sprites.add(rita)
         rita_group.add(rita)
+        
 
     for event in pygame.event.get():
         # check for closing window
@@ -557,6 +574,9 @@ while running:
     all_sprites.update()
     if progress >= 20:
         rita_group.update()
+        if not music_on: 
+            boss_battle()
+            music_on = True
 
     # Collisions
     # check to see if a bullet hit a mob
@@ -616,6 +636,7 @@ while running:
     if rita.shield <= 0:
         rita.kill()
         congratulations = True
+        
 
     # check to see if an enemy bullet hit the players
     hits = pygame.sprite.spritecollide(
