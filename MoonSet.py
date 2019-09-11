@@ -23,6 +23,8 @@ YELLOW = (255, 255, 0)
 # Custom enemy auto fire event
 ENEMY_FIRE = pygame.USEREVENT
 pygame.time.set_timer(ENEMY_FIRE, 1000)
+BOSS_FIRE = pygame.USEREVENT
+pygame.time.set_timer(BOSS_FIRE, 1000)
 
 
 # Initialize pygame and create window
@@ -284,10 +286,35 @@ class Rita(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(boss_moon, (100, 100))
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
+        self.radius = 40
+        # pygame.draw.circle(self.image,RED, self.rect.center, self.radius)
         self.rect.centerx = WIDTH / 2
-        self.rect.bottom = HEIGHT / 2
-    # def update(self):
+        self.rect.y = -10
+        self.speedy = 0
+        self.speedx = 0
+        self.shield = 100
 
+    def update(self):
+        self.rect.y += self.speedy
+        self.rect.x += self.speedx
+        if self.rect.y <= 150:
+            self.speedy = 1
+        else:
+            self.speedy = 0
+            if self.speedx == 0:
+                self.speedx = 1
+
+            if self.rect.right == WIDTH:
+                self.speedx = -1
+            if self.rect.left == 0:
+                self.speedx = 1
+            # if self.rect.centerx == WIDTH / 2:
+            #     self.speedx = 1
+
+    def shoot(self):
+        enemy_bullet = Enemy_Bullet(self.rect.centerx, self.rect.top)
+        all_sprites.add(enemy_bullet)
+        enemy_bullets.add(enemy_bullet)
 
 # Bullet for the Enemy Ship
 
@@ -352,6 +379,7 @@ bullets = pygame.sprite.Group()
 enemy_bullets = pygame.sprite.Group()
 mob = pygame.sprite.Group()
 rita = Rita()
+rita_group = pygame.sprite.Group(rita)
 player = PlayerShip()
 player2 = Player2Ship()
 all_sprites.add(player)
@@ -421,11 +449,10 @@ while running:
     '''
 
     if progress >= 20:
-        # for a in mob:
-        #     a.kill()
-        # all_sprites.add(rita)
-        congratulations = True
-        # menu = True
+        for a in mob:
+            a.kill()
+        all_sprites.add(rita)
+        rita_group.add(rita)
 
     for event in pygame.event.get():
         # check for closing window
@@ -433,10 +460,12 @@ while running:
             running = False
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
-                player.shoot()  # TODO Add a Function alive() so that we check for player being alive
+                if player.shield > 0:
+                    player.shoot()  # TODO Add a Function alive() so that we check for player being alive
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LSHIFT:
-                player2.shoot()
+                if player2.shield > 0:
+                    player2.shoot()
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_t:
                 for a in mob:
@@ -448,9 +477,15 @@ while running:
         if event.type == ENEMY_FIRE:
             for a in mob:
                 a.shoot()
+        if progress >= 20:
+            if rita.shield > 0:
+                if event.type == BOSS_FIRE:
+                    rita.shoot()
 
     # * Update
     all_sprites.update()
+    if progress >= 20:
+        rita_group.update()
 
     # Collisions
     # check to see if a bullet hit a mob
@@ -461,12 +496,17 @@ while running:
         progress += 3
         random.choice(expl_sound).play()
 
+    # check to see if a bullet hit a boss
+    hits = pygame.sprite.groupcollide(
+        rita_group, bullets, True, pygame.sprite.collide_circle)
+    for hit in hits:
+        rita.shield -= 10
+
     # check to see if a mob hit the player1
     hits = pygame.sprite.spritecollide(
         player, mob, True, pygame.sprite.collide_circle)
     for hit in hits:
         player.shield -= hit.radius * 2
-        random.choice(expl_sound).play()
         newmob()
         if player.shield <= 0:
             player.kill()
@@ -477,12 +517,31 @@ while running:
     for hit in hits:
         player2.shield -= hit.radius * 2
         newmob()
-        random.choice(expl_sound).play()
+        if player2.shield <= 0:
+            player2.kill()
+
+        # check to see if boss hits the player
+    hits = pygame.sprite.spritecollide(
+        player, rita_group, True, pygame.sprite.collide_circle)
+    for hit in hits:
+        player.shield -= hit.radius * 2
+
+        if player.shield <= 0:
+            player.kill()
+
+        # check to see if a boss hit the player2
+    hits = pygame.sprite.spritecollide(
+        player2, rita_group, True, pygame.sprite.collide_circle)
+    for hit in hits:
+        player2.shield -= hit.radius * 2
         if player2.shield <= 0:
             player2.kill()
 
     if player.shield <= 0 and player2.shield <= 0:
         game_over = True
+
+    if rita.shield <= 0:
+        rita.kill()
 
     # check to see if an enemy bullet hit the players
     hits = pygame.sprite.spritecollide(
