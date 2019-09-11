@@ -285,13 +285,13 @@ class Rita(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.Surface((50, 100))
-        self.image = pygame.transform.scale(boss_moon, (100, 100))
+        self.image = pygame.transform.scale(boss_moon, (150, 150))
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.radius = 40
         # pygame.draw.circle(self.image,RED, self.rect.center, self.radius)
         self.rect.centerx = WIDTH / 2
-        self.rect.y = -10
+        self.rect.y = -100
         self.speedy = 0
         self.speedx = 0
         self.shield = 100
