@@ -98,7 +98,8 @@ def show_menu_screen():
 
 
 def show_congratulations_screen():
-    end_game()   
+    end_game()
+    wait()
     screen.blit(congratulations_image, congratulations_image_rect)
     pygame.display.flip()
     waiting = True
@@ -117,6 +118,7 @@ def show_congratulations_screen():
 
 def show_gameover_screen():
     screen.blit(game_over_image, game_over_image_rect)
+    main_music()
     pygame.display.flip()
     waiting = True
     while waiting:
@@ -622,16 +624,9 @@ while running:
         rita_group, bullets, True, pygame.sprite.collide_circle)
     for hit in hits:
         rita.shield -= 5
-        if rita.shield == 0:
-            expl3 = Explosion(hit.rect.center, 'xxl')
-            random.choice(expl_sound).play()
-            all_sprites.add(expl3)
-        else:
-            expl2 = Explosion(hit.rect.center, 'xl')
-            random.choice(expl_sound).play()
-            all_sprites.add(expl2)
-        
-        
+        expl2 = Explosion(hit.rect.center, 'xl')
+        random.choice(expl_sound).play()
+        all_sprites.add(expl2)
         
     def boom():
         expl = Explosion(hit.rect.center, 'sm')
@@ -685,11 +680,15 @@ while running:
  
     #! DEATH OF RITA
     def wait():
-        pygame.time.wait(50)
-        congratulations = True
+        pygame.time.delay(1000)
     if rita.shield <= 0:
-        rita.kill()
-        wait()                
+        expl3 = Explosion(hit.rect.center, 'xxl')
+        random.choice(expl_sound).play()
+        all_sprites.add(expl3)
+        rita.kill()             
+        congratulations = True
+    
+        
 
         
 
