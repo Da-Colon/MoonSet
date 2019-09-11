@@ -27,7 +27,6 @@ BOSS_FIRE = pygame.USEREVENT
 pygame.time.set_timer(BOSS_FIRE, 1000)
 
 
-
 # Initialize pygame and create window
 pygame.init()
 pygame.mixer.init()
@@ -78,6 +77,8 @@ def progress_bar(surf, x, y, pct):
     pygame.draw.rect(surf, BLUE, fill_rect)
     pygame.draw.rect(surf, YELLOW, outline_rect, 4)
 
+# Intro Screen
+
 
 def show_menu_screen():
     screen.blit(intro_background, intro_background_rect)
@@ -92,6 +93,25 @@ def show_menu_screen():
             # Any key press will start the game
             if event.type == pygame.KEYDOWN:
                 waiting = False
+
+# Game Completion/Win Screen
+
+
+def show_congratulations_screen():
+    screen.blit(congratulations_image, congratulations_image_rect)
+    pygame.display.flip()
+    waiting = True
+    while waiting:
+        clock.tick(FPS)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+            if event.type == pygame.KEYDOWN:
+                # Space bar to start the game
+                if event.key == pygame.K_SPACE:
+                    waiting = False
+
+# Loss Screen
 
 
 def show_gameover_screen():
@@ -241,7 +261,6 @@ class Mob(pygame.sprite.Sprite):
         # shoot_sound.play()
 
 
-
 # Bullet for the Player Ship
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, x, y):
@@ -259,6 +278,7 @@ class Bullet(pygame.sprite.Sprite):
         # kill if it moves off the top of the screen
         if self.rect.bottom < 0:
             self.kill()
+
 
 class Rita(pygame.sprite.Sprite):
     def __init__(self):
@@ -297,6 +317,8 @@ class Rita(pygame.sprite.Sprite):
             enemy_bullets.add(enemy_bullet)
 
 # Bullet for the Enemy Ship
+
+
 class Enemy_Bullet(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
@@ -361,6 +383,9 @@ background_rect = background.get_rect()
 intro_background = pygame.image.load(
     path.join(img_dir, 'Intro.png')).convert()
 intro_background_rect = intro_background.get_rect()
+congratulations_image = pygame.image.load(
+    path.join(img_dir, "congratulations2.png"))
+congratulations_image_rect = congratulations_image.get_rect()
 game_over_image = pygame.image.load(path.join(img_dir, "game_over.png"))
 game_over_image_rect = game_over_image.get_rect()
 player_img = pygame.image.load(path.join(img_dir, "playerShip.png")).convert()
@@ -400,19 +425,24 @@ all_sprites.add(player)
 all_sprites.add(player2)
 
 
-
 # Spawns up to 4 Enemy Ships by added them to the all_sprites group allow them to be drawn
 for i in range(4):
     newmob()
 
+
 score = 0
 progress = 0
+# Menu controls the Introduction screen
 menu = True
+# Congratulations controls the player win screen display
+congratulations = False
+# game_over is the screen that displays if the player loses
 game_over = False
+boss = False
 running = True
 pygame.mixer.music.play(loops=-1)
 
-
+count = 0
 while running:
 
     # keep loop running at the right speed
@@ -421,6 +451,7 @@ while running:
     if menu:
         show_menu_screen()
         menu = False
+
     if game_over:
         show_gameover_screen()
         game_over = False
@@ -435,6 +466,21 @@ while running:
         all_sprites.add(player2)
         for i in range(4):
             newmob()
+
+    if congratulations:
+        show_congratulations_screen()
+        congratulations = False
+        all_sprites = pygame.sprite.Group()
+        mob = pygame.sprite.Group()
+        bullets = pygame.sprite.Group()
+        enemy_bullets = pygame.sprite.Group()
+        player = PlayerShip()
+        player2 = Player2Ship()
+        all_sprites.add(player)
+        all_sprites.add(player2)
+        for i in range(4):
+            newmob()
+
     if progress >= 20:
         for a in mob:
             a.kill()
@@ -464,8 +510,8 @@ while running:
         if event.type == ENEMY_FIRE:
             for a in mob:
                 a.shoot()
-        if progress >= 20:  
-            if rita.shield > 0:  
+        if progress >= 20:
+            if rita.shield > 0:
                 if event.type == BOSS_FIRE:
                     rita.shoot() 
 
@@ -484,7 +530,8 @@ while running:
         random.choice(expl_sound).play()
 
     # check to see if a bullet hit a boss
-    hits = pygame.sprite.groupcollide(rita_group, bullets, True, pygame.sprite.collide_circle)
+    hits = pygame.sprite.groupcollide(
+        rita_group, bullets, True, pygame.sprite.collide_circle)
     for hit in hits:
         rita.shield -= 10
 
@@ -506,13 +553,14 @@ while running:
         if player2.shield <= 0:
             player2.kill()
 
-        # check to see if boss hits the player       
-    hits = pygame.sprite.spritecollide(player, rita_group, True, pygame.sprite.collide_circle)
+        # check to see if boss hits the player
+    hits = pygame.sprite.spritecollide(
+        player, rita_group, True, pygame.sprite.collide_circle)
     for hit in hits:
         player.shield -= hit.radius * 2
-         
+
         if player.shield <= 0:
-            player.kill() 
+            player.kill()
 
         # check to see if a boss hit the player2
     hits = pygame.sprite.spritecollide(
@@ -527,6 +575,7 @@ while running:
 
     if rita.shield <= 0:
         rita.kill()
+        congratulations = True
 
     # check to see if an enemy bullet hit the players
     hits = pygame.sprite.spritecollide(
