@@ -25,6 +25,8 @@ ENEMY_FIRE = pygame.USEREVENT
 pygame.time.set_timer(ENEMY_FIRE, 1000)
 BOSS_FIRE = pygame.USEREVENT
 pygame.time.set_timer(BOSS_FIRE, 1000)
+WIN_GAME = pygame.USEREVENT
+pygame.time.set_timer(WIN_GAME, 5000)
 
 
 # Initialize pygame and create window
@@ -567,7 +569,7 @@ while running:
             a.kill()
         all_sprites.add(rita)
         rita_group.add(rita)
-        
+
 
     for event in pygame.event.get():
         # check for closing window
@@ -592,6 +594,10 @@ while running:
             if rita.shield > 0:
                 if event.type == BOSS_FIRE:
                     rita.shoot()
+        if rita.shield <= 0:
+            if event.type == WIN_GAME:
+                congratulations = True
+
 
     # * Update 
     all_sprites.update()
@@ -685,9 +691,11 @@ while running:
     def wait():
         pygame.time.wait(50)
         congratulations = True
+        return congratulations
     if rita.shield <= 0:
+        wait()       
         rita.kill()
-        wait()                
+
 
         
     # check to see if an enemy bullet hit the players
