@@ -345,7 +345,7 @@ intro_background = pygame.image.load(
     path.join(img_dir, 'Intro.png')).convert()
 intro_background_rect = intro_background.get_rect()
 congratulations_image = pygame.image.load(
-    path.join(img_dir, "congratulations.png"))
+    path.join(img_dir, "congratulations2.png"))
 congratulations_image_rect = congratulations_image.get_rect()
 game_over_image = pygame.image.load(path.join(img_dir, "game_over.png"))
 game_over_image_rect = game_over_image.get_rect()
@@ -442,12 +442,6 @@ while running:
         for i in range(4):
             newmob()
 
-    # ! When the boss dies, switch congratulations to True. Below is pseudo code
-    '''
-    If the boss is dead:
-        congratulations = True
-    '''
-
     if progress >= 20:
         for a in mob:
             a.kill()
@@ -542,6 +536,7 @@ while running:
 
     if rita.shield <= 0:
         rita.kill()
+        congratulations = True
 
     # check to see if an enemy bullet hit the players
     hits = pygame.sprite.spritecollide(
