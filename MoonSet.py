@@ -381,8 +381,6 @@ class Bullet_dia_right(pygame.sprite.Sprite):
             self.kill()
 
 #! EXPLOSIONS CLASS
-
-
 class Explosion(pygame.sprite.Sprite):
     def __init__(self, center, size):
         pygame.sprite.Sprite.__init__(self)
@@ -562,7 +560,7 @@ while running:
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LSHIFT:
                 if player.shield > 0:
-                    player.shoot() 
+                    player.shoot()
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
                 if player2.shield > 0:
@@ -616,10 +614,10 @@ while running:
         
         
         
-    def test_boom():
-        expl2 = Explosion(hit.rect.center, 'xl')
+    def boom():
+        expl = Explosion(hit.rect.center, 'sm')
         random.choice(expl_sound).play()
-        all_sprites.add(expl2)
+        all_sprites.add(expl)
 
     # check to see if a mob hit the player1
     #! Player 1 mob hit
@@ -666,10 +664,12 @@ while running:
         game_over = True
 
     #! DEATH OF RITA
-
+    def wait():
+        pygame.time.wait(50)
+        congratulations = True
     if rita.shield <= 0:
         rita.kill()
-        #congratulations = True
+        wait()                
 
         
 
@@ -679,7 +679,7 @@ while running:
         player, enemy_bullets, True, pygame.sprite.collide_circle)
     for hit in hits:
         player.shield -= 10 #PLAYER 1 HEALTH
-        test_boom()#! EXPLOSION 
+        boom()#! EXPLOSION 
         if player.shield <= 0:
             player.kill()
 
@@ -688,7 +688,7 @@ while running:
         player2, enemy_bullets, True, pygame.sprite.collide_circle)
     for hit in hits:
         player2.shield -= 10 #PLAYER 2 HEALTH
-        test_boom() #! EXPLOSION 
+        boom() #! EXPLOSION 
         if player2.shield <= 0:
             player2.kill()
 
