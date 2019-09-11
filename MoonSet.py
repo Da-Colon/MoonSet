@@ -547,6 +547,13 @@ while running:
         all_sprites.add(rita)
         rita_group.add(rita)
 
+    # We want to make sure these objects are removed from the game when they "die"
+    if player.shield <= 0:
+        player.kill()
+
+    if player2.shield <= 0:
+        player2.kill()
+
     for event in pygame.event.get():
         # check for closing window
         if event.type == pygame.QUIT:
