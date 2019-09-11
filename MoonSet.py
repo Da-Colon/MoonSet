@@ -25,6 +25,8 @@ ENEMY_FIRE = pygame.USEREVENT
 pygame.time.set_timer(ENEMY_FIRE, 1000)
 BOSS_FIRE = pygame.USEREVENT
 pygame.time.set_timer(BOSS_FIRE, 1000)
+WIN_GAME = pygame.USEREVENT
+pygame.time.set_timer(WIN_GAME, 1000)
 
 
 # Initialize pygame and create window
@@ -470,7 +472,8 @@ def end_game():
     pygame.mixer.music.stop()
     pygame.mixer.music.load(path.join(snd_dir, 'fanfare.mp3'))
     pygame.mixer.music.play()
-pygame.mixer.music.set_volume(0.6)
+pygame.mixer.music.set_volume(1)
+
 
 
 
@@ -569,7 +572,7 @@ while running:
             a.kill()
         all_sprites.add(rita)
         rita_group.add(rita)
-        
+
 
     for event in pygame.event.get():
         # check for closing window
@@ -584,10 +587,6 @@ while running:
                 if player2.shield > 0:
                     player2.shoot()
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_t:
-                for a in mob:
-                    a.shoot()
-        if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_q:
                 running = False
         # Loop through the Enemy_Fire event and shoot every second
@@ -598,9 +597,14 @@ while running:
             if rita.shield > 0:
                 if event.type == BOSS_FIRE:
                     rita.shoot()
+        if rita.shield <= 0:
+            if event.type == WIN_GAME:
+                congratulations = True
+
 
     # * Update 
     all_sprites.update()
+
     if progress >= 100: #BOSS SPAWN UPDATE / RITA SPAWN UPDATE
         rita_group.update()
         if not music_on: 
@@ -615,7 +619,8 @@ while running:
         score += 50 - hit.radius
         progress += 3
         random.choice(expl_sound).play()
-        expl = Explosion(hit.rect.center, 'lg')  # ! EXPLOSIONS HIT
+        # ! EXPLOSIONS HIT
+        expl = Explosion(hit.rect.center, 'lg')  
         all_sprites.add(expl)
 
     #! BOSS HIT
@@ -653,8 +658,8 @@ while running:
         if player2.shield <= 0:
             player2.kill()
 
-        # check to see if boss hits the player
-        #! Player 1 Boss hit
+    # check to see if boss hits the player
+    #! Player 1 Boss hit
     hits = pygame.sprite.spritecollide(
         player, rita_group, True, pygame.sprite.collide_circle)
     for hit in hits:
@@ -662,8 +667,8 @@ while running:
         if player.shield <= 0:
             player.kill()
 
-        # check to see if a boss hit the player2
-        #! Player 2 boss hit
+    # check to see if a boss hit the player2
+    #! Player 2 boss hit
     hits = pygame.sprite.spritecollide(
         player2, rita_group, True, pygame.sprite.collide_circle)
     for hit in hits:
@@ -680,18 +685,15 @@ while running:
  
     #! DEATH OF RITA
     def wait():
-        pygame.time.delay(1000)
-    if rita.shield <= 0:
-        expl3 = Explosion(hit.rect.center, 'xxl')
-        random.choice(expl_sound).play()
-        all_sprites.add(expl3)
-        rita.kill()             
+        pygame.time.wait(50)
         congratulations = True
-    
-        
+        return congratulations
+    if rita.shield <= 0:
+        wait()       
+        rita.kill()
+
 
         
-
     # check to see if an enemy bullet hit the players
     #! MOB BULLET HIT PLAYER 1
     hits = pygame.sprite.spritecollide(
